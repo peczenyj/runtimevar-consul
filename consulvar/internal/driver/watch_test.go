@@ -3,6 +3,7 @@ package driver
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/go-openapi/testify/assert"
 	"github.com/go-openapi/testify/require"
@@ -42,4 +43,19 @@ func TestWatchVariable_DetectsUpdate(t *testing.T) {
 	v, err := s2.Value()
 	require.NoError(t, err)
 	assert.Equal(t, "v2", v)
+}
+
+func TestWatchVariable_NoChange_Suppressed(t *testing.T) {
+	f := newFakeConsul(t)
+	f.SetValue([]byte("v1"))
+	w := NewWatcher(f.client(t), "k", Config{Decoder: runtimevar.StringDecoder})
+
+	s1, _ := w.WatchVariable(context.Background(), nil)
+	require.NotNil(t, s1)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+	f.ForceLastIndex(1)
+	s2, _ := w.WatchVariable(ctx, s1)
+	assert.Nil(t, s2)
 }
