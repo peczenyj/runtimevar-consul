@@ -85,3 +85,20 @@ func TestWatchVariable_NotFound_StableSameIndex(t *testing.T) {
 	s2, _ := w.WatchVariable(ctx, s1)
 	assert.Nil(t, s2)
 }
+
+func TestWatchVariable_KeyAppears(t *testing.T) {
+	f := newFakeConsul(t)
+	w := NewWatcher(f.client(t), "k", Config{Decoder: runtimevar.StringDecoder})
+
+	s1, _ := w.WatchVariable(context.Background(), nil)
+	require.NotNil(t, s1)
+	_, err := s1.Value()
+	require.Error(t, err)
+
+	f.SetValue([]byte("appeared"))
+	s2, _ := w.WatchVariable(context.Background(), s1)
+	require.NotNil(t, s2)
+	v, err := s2.Value()
+	require.NoError(t, err)
+	assert.Equal(t, "appeared", v)
+}
