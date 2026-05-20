@@ -2,6 +2,8 @@ package driver
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"testing"
 	"time"
 
@@ -101,4 +103,21 @@ func TestWatchVariable_KeyAppears(t *testing.T) {
 	v, err := s2.Value()
 	require.NoError(t, err)
 	assert.Equal(t, "appeared", v)
+}
+
+func TestWatchVariable_DecodeError(t *testing.T) {
+	f := newFakeConsul(t)
+	f.SetValue([]byte("not-json"))
+
+	var dst map[string]any
+	dec := runtimevar.NewDecoder(&dst, runtimevar.JSONDecode)
+	w := NewWatcher(f.client(t), "k", Config{Decoder: dec})
+
+	s, _ := w.WatchVariable(context.Background(), nil)
+	require.NotNil(t, s)
+	_, err := s.Value()
+	require.Error(t, err)
+
+	var je *json.SyntaxError
+	_ = errors.As(err, &je)
 }
