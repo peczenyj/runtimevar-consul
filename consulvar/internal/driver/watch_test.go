@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/http"
 	"testing"
 	"time"
 
@@ -120,4 +121,28 @@ func TestWatchVariable_DecodeError(t *testing.T) {
 
 	var je *json.SyntaxError
 	_ = errors.As(err, &je)
+}
+
+func TestWatchVariable_TransportErrorThenRecover(t *testing.T) {
+	f := newFakeConsul(t)
+	f.SetValue([]byte("v1"))
+	w := NewWatcher(f.client(t), "k", Config{Decoder: runtimevar.StringDecoder})
+
+	f.FailNext(http.StatusInternalServerError)
+	s1, wait1 := w.WatchVariable(context.Background(), nil)
+	require.NotNil(t, s1)
+	_, err := s1.Value()
+	require.Error(t, err)
+	assert.Equal(t, time.Second, wait1)
+
+	s2, wait2 := w.WatchVariable(context.Background(), s1)
+	require.NotNil(t, s2)
+	v, err := s2.Value()
+	require.NoError(t, err)
+	assert.Equal(t, "v1", v)
+	assert.Equal(t, time.Duration(0), wait2)
+
+	f.FailNext(http.StatusInternalServerError)
+	_, wait3 := w.WatchVariable(context.Background(), s2)
+	assert.Equal(t, time.Second, wait3)
 }
