@@ -71,3 +71,17 @@ func TestWatchVariable_KeyMissing_NotFound(t *testing.T) {
 	require.Error(t, err)
 	assert.Equal(t, gcerrors.NotFound, w.ErrorCode(err))
 }
+
+func TestWatchVariable_NotFound_StableSameIndex(t *testing.T) {
+	f := newFakeConsul(t)
+	w := NewWatcher(f.client(t), "missing", Config{Decoder: runtimevar.StringDecoder})
+
+	s1, _ := w.WatchVariable(context.Background(), nil)
+	require.NotNil(t, s1)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+	f.ForceLastIndex(0)
+	s2, _ := w.WatchVariable(ctx, s1)
+	assert.Nil(t, s2)
+}
