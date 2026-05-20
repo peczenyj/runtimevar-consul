@@ -8,6 +8,7 @@ import (
 	"github.com/go-openapi/testify/assert"
 	"github.com/go-openapi/testify/require"
 	"github.com/hashicorp/consul/api"
+	"gocloud.dev/gcerrors"
 	"gocloud.dev/runtimevar"
 )
 
@@ -58,4 +59,15 @@ func TestWatchVariable_NoChange_Suppressed(t *testing.T) {
 	f.ForceLastIndex(1)
 	s2, _ := w.WatchVariable(ctx, s1)
 	assert.Nil(t, s2)
+}
+
+func TestWatchVariable_KeyMissing_NotFound(t *testing.T) {
+	f := newFakeConsul(t)
+	w := NewWatcher(f.client(t), "missing", Config{Decoder: runtimevar.StringDecoder})
+
+	s, _ := w.WatchVariable(context.Background(), nil)
+	require.NotNil(t, s)
+	_, err := s.Value()
+	require.Error(t, err)
+	assert.Equal(t, gcerrors.NotFound, w.ErrorCode(err))
 }
