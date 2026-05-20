@@ -11,8 +11,8 @@ type state struct {
 	val any
 	err error
 	// modifyIndex carries the Consul KV ModifyIndex used to chain blocking
-	// queries; consumed by the watch loop introduced in a later phase.
-	modifyIndex uint64 //nolint:unused // populated by upcoming WatchVariable implementation
+	// queries across WatchVariable calls.
+	modifyIndex uint64
 	raw         *api.KVPair
 	updated     time.Time
 }

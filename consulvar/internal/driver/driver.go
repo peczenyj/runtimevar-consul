@@ -28,9 +28,8 @@ type Watcher struct {
 	key       string
 	decoder   *runtimevar.Decoder
 	baseQuery api.QueryOptions
-	// failures tracks consecutive WatchVariable errors for backoff; wired up
-	// by the watch loop introduced in a later phase.
-	failures int //nolint:unused // populated by upcoming WatchVariable implementation
+	// failures tracks consecutive WatchVariable errors for exponential backoff.
+	failures int
 }
 
 // NewWatcher constructs a Watcher. The caller owns client; Close is a no-op.
