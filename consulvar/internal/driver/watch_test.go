@@ -146,3 +146,31 @@ func TestWatchVariable_TransportErrorThenRecover(t *testing.T) {
 	_, wait3 := w.WatchVariable(context.Background(), s2)
 	assert.Equal(t, time.Second, wait3)
 }
+
+func TestWatchVariable_ContextCancel(t *testing.T) {
+	f := newFakeConsul(t)
+	f.SetValue([]byte("v1"))
+	w := NewWatcher(f.client(t), "k", Config{
+		Decoder:  runtimevar.StringDecoder,
+		WaitTime: 5 * time.Second,
+	})
+
+	s1, _ := w.WatchVariable(context.Background(), nil)
+	require.NotNil(t, s1)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	go func() {
+		_, _ = w.WatchVariable(ctx, s1)
+		close(done)
+	}()
+
+	time.Sleep(50 * time.Millisecond)
+	cancel()
+
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("WatchVariable did not return after context cancel")
+	}
+}
