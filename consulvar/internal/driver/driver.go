@@ -6,12 +6,9 @@
 package driver
 
 import (
-	"context"
-	"errors"
 	"time"
 
 	"github.com/hashicorp/consul/api"
-	"gocloud.dev/gcerrors"
 	"gocloud.dev/runtimevar"
 )
 
@@ -53,59 +50,3 @@ func NewWatcher(client *api.Client, key string, cfg Config) *Watcher {
 // Close releases watcher resources. The caller-owned *api.Client is left
 // alone, so this is a no-op.
 func (w *Watcher) Close() error { return nil }
-
-// state is the driver.State implementation returned from WatchVariable.
-type state struct {
-	val any
-	err error
-	// modifyIndex carries the Consul KV ModifyIndex used to chain blocking
-	// queries; consumed by the watch loop introduced in a later phase.
-	modifyIndex uint64 //nolint:unused // populated by upcoming WatchVariable implementation
-	raw         *api.KVPair
-	updated     time.Time
-}
-
-func (s *state) Value() (any, error) {
-	if s.err != nil {
-		return nil, s.err
-	}
-	return s.val, nil
-}
-
-func (s *state) UpdateTime() time.Time { return s.updated }
-
-// As supports `**api.KVPair` so callers can reach the underlying Flags,
-// Session, etc. from the last observed pair. Returns false otherwise.
-func (s *state) As(i any) bool {
-	p, ok := i.(**api.KVPair)
-	if !ok {
-		return false
-	}
-	*p = s.raw
-	return true
-}
-
-// errKeyNotFound is the sentinel returned (wrapped) when Consul reports the
-// watched key does not exist. It is not exported; callers should inspect the
-// gcerrors.ErrorCode of the user-facing error.
-var errKeyNotFound = errors.New("key not found")
-
-// ErrorAs returns false. Consul's api package does not expose typed errors,
-// so there's no useful conversion to offer.
-func (w *Watcher) ErrorAs(_ error, _ any) bool { return false }
-
-// ErrorCode maps internal errors to gcerrors codes for the runtimevar.Variable.
-func (w *Watcher) ErrorCode(err error) gcerrors.ErrorCode {
-	switch {
-	case err == nil:
-		return gcerrors.OK
-	case errors.Is(err, context.Canceled):
-		return gcerrors.Canceled
-	case errors.Is(err, context.DeadlineExceeded):
-		return gcerrors.DeadlineExceeded
-	case errors.Is(err, errKeyNotFound):
-		return gcerrors.NotFound
-	default:
-		return gcerrors.Unknown
-	}
-}
