@@ -1,6 +1,7 @@
 package driver
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -8,6 +9,7 @@ import (
 	"github.com/go-openapi/testify/assert"
 	"github.com/go-openapi/testify/require"
 	"github.com/hashicorp/consul/api"
+	"gocloud.dev/gcerrors"
 	"gocloud.dev/runtimevar"
 )
 
@@ -60,4 +62,25 @@ func TestState_As_UnsupportedType(t *testing.T) {
 	var got string
 	ok := s.As(&got)
 	assert.False(t, ok)
+}
+
+func TestErrorCode_Table(t *testing.T) {
+	w := newTestWatcher(t)
+	cases := []struct {
+		name string
+		err  error
+		want gcerrors.ErrorCode
+	}{
+		{"nil", nil, gcerrors.OK},
+		{"canceled", context.Canceled, gcerrors.Canceled},
+		{"deadline", context.DeadlineExceeded, gcerrors.DeadlineExceeded},
+		{"notfound", errKeyNotFound, gcerrors.NotFound},
+		{"notfound-wrapped", errors.Join(errors.New("consulvar: key \"x\""), errKeyNotFound), gcerrors.NotFound},
+		{"other", errors.New("boom"), gcerrors.Unknown},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, w.ErrorCode(tc.err))
+		})
+	}
 }
