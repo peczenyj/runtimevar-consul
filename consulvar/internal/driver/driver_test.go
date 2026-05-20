@@ -64,6 +64,12 @@ func TestState_As_UnsupportedType(t *testing.T) {
 	assert.False(t, ok)
 }
 
+func TestErrorAs_AlwaysFalse(t *testing.T) {
+	w := newTestWatcher(t)
+	var target *api.KVPair
+	assert.False(t, w.ErrorAs(errors.New("anything"), &target))
+}
+
 func TestErrorCode_Table(t *testing.T) {
 	w := newTestWatcher(t)
 	cases := []struct {
