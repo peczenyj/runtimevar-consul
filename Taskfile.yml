@@ -1,0 +1,42 @@
+version: '3'
+
+tasks:
+  default:
+    desc: "List available tasks"
+    cmds:
+      - task --list
+
+  test:
+    desc: "Run unit tests via gotestsum"
+    cmds:
+      - gotestsum -- ./...
+
+  test:integration:
+    desc: "Run unit + integration tests (requires Docker)"
+    cmds:
+      - gotestsum -- -tags=integration ./...
+
+  lint:
+    desc: "Run golangci-lint"
+    cmds:
+      - golangci-lint run ./...
+
+  format:
+    desc: "Format Go code with golangci-lint v2's built-in formatters"
+    cmds:
+      - golangci-lint fmt ./...
+
+  tidy:
+    desc: "Run go mod tidy"
+    cmds:
+      - go mod tidy
+
+  changelog:
+    desc: "Regenerate CHANGELOG.md from git history"
+    cmds:
+      - git cliff -o CHANGELOG.md
+
+  changelog:unreleased:
+    desc: "Preview the next release's changelog section"
+    cmds:
+      - git cliff --unreleased
