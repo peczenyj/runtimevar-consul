@@ -48,3 +48,32 @@ func NewWatcher(client *api.Client, key string, cfg Config) *Watcher {
 // Close releases watcher resources. The caller-owned *api.Client is left
 // alone, so this is a no-op.
 func (w *Watcher) Close() error { return nil }
+
+// state is the driver.State implementation returned from WatchVariable.
+type state struct {
+	val         any
+	err         error
+	modifyIndex uint64
+	raw         *api.KVPair
+	updated     time.Time
+}
+
+func (s *state) Value() (any, error) {
+	if s.err != nil {
+		return nil, s.err
+	}
+	return s.val, nil
+}
+
+func (s *state) UpdateTime() time.Time { return s.updated }
+
+// As supports `**api.KVPair` so callers can reach the underlying Flags,
+// Session, etc. from the last observed pair. Returns false otherwise.
+func (s *state) As(i any) bool {
+	p, ok := i.(**api.KVPair)
+	if !ok {
+		return false
+	}
+	*p = s.raw
+	return true
+}

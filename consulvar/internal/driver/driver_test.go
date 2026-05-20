@@ -1,7 +1,9 @@
 package driver
 
 import (
+	"errors"
 	"testing"
+	"time"
 
 	"github.com/go-openapi/testify/assert"
 	"github.com/go-openapi/testify/require"
@@ -26,4 +28,36 @@ func TestNewWatcher_NotNil(t *testing.T) {
 func TestWatcher_Close_NoOp(t *testing.T) {
 	w := newTestWatcher(t)
 	assert.NoError(t, w.Close())
+}
+
+func TestState_ValueAndUpdateTime(t *testing.T) {
+	now := time.Now()
+	s := &state{val: "hello", updated: now}
+	v, err := s.Value()
+	require.NoError(t, err)
+	assert.Equal(t, "hello", v)
+	assert.Equal(t, now, s.UpdateTime())
+}
+
+func TestState_ValueReturnsErr(t *testing.T) {
+	boom := errors.New("boom")
+	s := &state{err: boom}
+	_, err := s.Value()
+	assert.ErrorIs(t, err, boom)
+}
+
+func TestState_As_KVPair(t *testing.T) {
+	kv := &api.KVPair{Key: "k", Value: []byte("v"), ModifyIndex: 7}
+	s := &state{raw: kv}
+	var got *api.KVPair
+	ok := s.As(&got)
+	assert.True(t, ok)
+	assert.Same(t, kv, got)
+}
+
+func TestState_As_UnsupportedType(t *testing.T) {
+	s := &state{raw: &api.KVPair{}}
+	var got string
+	ok := s.As(&got)
+	assert.False(t, ok)
 }
