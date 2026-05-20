@@ -174,3 +174,17 @@ func TestWatchVariable_ContextCancel(t *testing.T) {
 		t.Fatal("WatchVariable did not return after context cancel")
 	}
 }
+
+func TestWatchVariable_IndexResetEmitsState(t *testing.T) {
+	f := newFakeConsul(t)
+	f.SetValue([]byte("v1"))
+	w := NewWatcher(f.client(t), "k", Config{Decoder: runtimevar.StringDecoder})
+
+	prev := &state{val: "old", modifyIndex: 100, updated: time.Now()}
+
+	s, _ := w.WatchVariable(context.Background(), prev)
+	require.NotNil(t, s, "expected a fresh state after cluster index reset")
+	v, err := s.Value()
+	require.NoError(t, err)
+	assert.Equal(t, "v1", v)
+}
