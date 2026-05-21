@@ -1,5 +1,15 @@
 # runtimevar-contrib
 
+[![tag](https://img.shields.io/github/tag/peczenyj/runtimevar-contrib.svg)](https://github.com/peczenyj/runtimevar-contrib/releases)
+![Go Version](https://img.shields.io/badge/Go-%3E%3D%201.26-%23007d9c)
+[![GoDoc](https://pkg.go.dev/badge/github.com/peczenyj/runtimevar-contrib)](http://pkg.go.dev/github.com/peczenyj/runtimevar-contrib)
+[![ci](https://github.com/peczenyj/runtimevar-contrib/actions/workflows/ci.yml/badge.svg)](https://github.com/peczenyj/runtimevar-contrib/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/peczenyj/runtimevar-contrib/graph/badge.svg?token=9y6f3vGgpr)](https://codecov.io/gh/peczenyj/runtimevar-contrib)
+[![Report card](https://goreportcard.com/badge/github.com/peczenyj/runtimevar-contrib)](https://goreportcard.com/report/github.com/peczenyj/runtimevar-contrib)
+[![CodeQL](https://github.com/peczenyj/runtimevar-contrib/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/peczenyj/runtimevar-contrib/actions/workflows/github-code-scanning/codeql)
+[![Dependency Review](https://github.com/peczenyj/runtimevar-contrib/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/peczenyj/runtimevar-contrib/actions/workflows/dependency-review.yml)
+[![License](https://img.shields.io/github/license/peczenyj/runtimevar-contrib)](./LICENSE)
+
 Third-party drivers for [`gocloud.dev/runtimevar`](https://pkg.go.dev/gocloud.dev/runtimevar).
 
 | Driver | Backend | Import |
