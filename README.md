@@ -12,7 +12,7 @@ Third-party drivers for [`gocloud.dev/runtimevar`](https://pkg.go.dev/gocloud.de
 import (
     "context"
 
-    "github.com/peczenyj/runtimevar-contrib/consulvar" // registers the consul:// scheme
+    _ "github.com/peczenyj/runtimevar-contrib/consulvar" // registers the consul:// scheme
     "gocloud.dev/runtimevar"
 )
 
