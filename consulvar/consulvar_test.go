@@ -3,9 +3,9 @@ package consulvar
 import (
 	"testing"
 
-	"github.com/go-openapi/testify/assert"
-	"github.com/go-openapi/testify/require"
 	"github.com/hashicorp/consul/api"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gocloud.dev/runtimevar"
 )
 

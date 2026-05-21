@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/go-openapi/testify/assert"
-	"github.com/go-openapi/testify/require"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gocloud.dev/runtimevar"
 )
 

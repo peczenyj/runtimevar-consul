@@ -7,13 +7,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-openapi/testify/assert"
-	"github.com/go-openapi/testify/require"
 	"github.com/hashicorp/consul/api"
-	"github.com/peczenyj/runtimevar-contrib/consulvar"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	tcconsul "github.com/testcontainers/testcontainers-go/modules/consul"
 	"gocloud.dev/gcerrors"
 	"gocloud.dev/runtimevar"
+
+	"github.com/peczenyj/runtimevar-contrib/consulvar"
 )
 
 const watchTimeout = 30 * time.Second
