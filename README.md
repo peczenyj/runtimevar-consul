@@ -41,15 +41,20 @@ go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
 # git-cliff: https://git-cliff.org/docs/installation
 ```
 
+Requires Go 1.26 or newer (set by the `go` directive in `go.mod`; the dependencies pull the floor up to it).
+
 Common commands (the `Makefile` delegates to `task`):
 
 ```bash
+task ci                 # full pre-push gate: tidy + lint + build + tests on the minimum Go
 task test               # unit tests
 task test:integration   # unit + integration (requires Docker)
 task lint
 task format
 task changelog:unreleased
 ```
+
+Run `task ci` before pushing — it mirrors the GitHub Actions matrix and pins the toolchain to the minimum supported Go, so a dependency that raises the version floor fails locally instead of only in CI.
 
 ## Commit messages
 
