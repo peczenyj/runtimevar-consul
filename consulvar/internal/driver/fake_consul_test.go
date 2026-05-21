@@ -120,22 +120,40 @@ func (f *fakeConsul) handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Observe request-context cancellation so blocked waiters return promptly
+	// when the client closes the connection.
+	ctx := r.Context()
+	done := make(chan struct{})
+	go func() {
+		select {
+		case <-ctx.Done():
+			f.mu.Lock()
+			f.cond.Broadcast()
+			f.mu.Unlock()
+		case <-done:
+		}
+	}()
+	defer close(done)
+
 	clientWaitIndex, _ := strconv.ParseUint(q.Get("index"), 10, 64)
-	waitDur := parseDurationOrZero(q.Get("wait"))
 	if clientWaitIndex > 0 && f.index <= clientWaitIndex {
-		deadline := time.Now().Add(maxDuration(waitDur, 50*time.Millisecond))
-		for f.index <= clientWaitIndex && time.Now().Before(deadline) && f.httpError == 0 {
-			waitCh := make(chan struct{})
-			go func() {
-				time.Sleep(time.Until(deadline))
-				f.cond.Broadcast()
-				close(waitCh)
-			}()
+		waitDur := parseDurationOrZero(q.Get("wait"))
+		if waitDur <= 0 {
+			waitDur = 50 * time.Millisecond
+		}
+		timer := time.AfterFunc(waitDur, func() {
+			f.mu.Lock()
+			f.cond.Broadcast()
+			f.mu.Unlock()
+		})
+		deadline := time.Now().Add(waitDur)
+		for f.index <= clientWaitIndex && time.Now().Before(deadline) && f.httpError == 0 && ctx.Err() == nil {
 			f.cond.Wait()
-			select {
-			case <-waitCh:
-			default:
-			}
+		}
+		timer.Stop()
+		if ctx.Err() != nil {
+			f.mu.Unlock()
+			return
 		}
 	}
 
@@ -191,13 +209,6 @@ func parseDurationOrZero(s string) time.Duration {
 		return 0
 	}
 	return d
-}
-
-func maxDuration(a, b time.Duration) time.Duration {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 func TestFakeConsul_ServesValue(t *testing.T) {

@@ -32,8 +32,11 @@ func (w *Watcher) WatchVariable(ctx context.Context, prev driver.State) (driver.
 
 	// Index-reset safety: per Consul docs, if meta.LastIndex < waitIndex the
 	// cluster's index has reset and the comparison is invalid.
+	//
+	// meta is always non-nil here: api.Client.KV().Get returns a populated
+	// *QueryMeta even on 404 (the X-Consul-Index header is still present).
 	effectivePrev := waitIndex
-	if meta != nil && meta.LastIndex < waitIndex {
+	if meta.LastIndex < waitIndex {
 		effectivePrev = 0
 	}
 

@@ -120,7 +120,7 @@ func TestWatchVariable_DecodeError(t *testing.T) {
 	require.Error(t, err)
 
 	var je *json.SyntaxError
-	_ = errors.As(err, &je)
+	require.True(t, errors.As(err, &je), "decode error should unwrap to *json.SyntaxError")
 }
 
 func TestWatchVariable_TransportErrorThenRecover(t *testing.T) {

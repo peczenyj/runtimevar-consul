@@ -28,7 +28,9 @@ type Watcher struct {
 	key       string
 	decoder   *runtimevar.Decoder
 	baseQuery api.QueryOptions
-	// failures tracks consecutive WatchVariable errors for exponential backoff.
+	// failures counts consecutive transport errors for the exponential backoff
+	// schedule. Not synchronized: gocloud.dev/runtimevar calls WatchVariable
+	// serially, never concurrently.
 	failures int
 }
 
