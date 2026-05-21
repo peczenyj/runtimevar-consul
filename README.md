@@ -1,20 +1,20 @@
-# runtimevar-contrib
+# runtimevar-consul
 
-[![tag](https://img.shields.io/github/tag/peczenyj/runtimevar-contrib.svg)](https://github.com/peczenyj/runtimevar-contrib/releases)
+[![tag](https://img.shields.io/github/tag/peczenyj/runtimevar-consul.svg)](https://github.com/peczenyj/runtimevar-consul/releases)
 ![Go Version](https://img.shields.io/badge/Go-%3E%3D%201.26-%23007d9c)
-[![GoDoc](https://pkg.go.dev/badge/github.com/peczenyj/runtimevar-contrib)](http://pkg.go.dev/github.com/peczenyj/runtimevar-contrib)
-[![ci](https://github.com/peczenyj/runtimevar-contrib/actions/workflows/ci.yml/badge.svg)](https://github.com/peczenyj/runtimevar-contrib/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/peczenyj/runtimevar-contrib/graph/badge.svg?token=9y6f3vGgpr)](https://codecov.io/gh/peczenyj/runtimevar-contrib)
-[![Report card](https://goreportcard.com/badge/github.com/peczenyj/runtimevar-contrib)](https://goreportcard.com/report/github.com/peczenyj/runtimevar-contrib)
-[![CodeQL](https://github.com/peczenyj/runtimevar-contrib/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/peczenyj/runtimevar-contrib/actions/workflows/github-code-scanning/codeql)
-[![Dependency Review](https://github.com/peczenyj/runtimevar-contrib/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/peczenyj/runtimevar-contrib/actions/workflows/dependency-review.yml)
-[![License](https://img.shields.io/github/license/peczenyj/runtimevar-contrib)](./LICENSE)
+[![GoDoc](https://pkg.go.dev/badge/github.com/peczenyj/runtimevar-consul)](http://pkg.go.dev/github.com/peczenyj/runtimevar-consul)
+[![ci](https://github.com/peczenyj/runtimevar-consul/actions/workflows/ci.yml/badge.svg)](https://github.com/peczenyj/runtimevar-consul/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/peczenyj/runtimevar-consul/graph/badge.svg?token=9y6f3vGgpr)](https://codecov.io/gh/peczenyj/runtimevar-consul)
+[![Report card](https://goreportcard.com/badge/github.com/peczenyj/runtimevar-consul)](https://goreportcard.com/report/github.com/peczenyj/runtimevar-consul)
+[![CodeQL](https://github.com/peczenyj/runtimevar-consul/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/peczenyj/runtimevar-consul/actions/workflows/github-code-scanning/codeql)
+[![Dependency Review](https://github.com/peczenyj/runtimevar-consul/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/peczenyj/runtimevar-consul/actions/workflows/dependency-review.yml)
+[![License](https://img.shields.io/github/license/peczenyj/runtimevar-consul)](./LICENSE)
 
 Third-party drivers for [`gocloud.dev/runtimevar`](https://pkg.go.dev/gocloud.dev/runtimevar).
 
 | Driver | Backend | Import |
 |---|---|---|
-| [`consulvar`](./consulvar) | HashiCorp Consul KV | `github.com/peczenyj/runtimevar-contrib/consulvar` |
+| [`consulvar`](./consulvar) | HashiCorp Consul KV | `github.com/peczenyj/runtimevar-consul/consulvar` |
 
 ## Quick start — `consulvar`
 
@@ -22,7 +22,7 @@ Third-party drivers for [`gocloud.dev/runtimevar`](https://pkg.go.dev/gocloud.de
 import (
     "context"
 
-    _ "github.com/peczenyj/runtimevar-contrib/consulvar" // registers the consul:// scheme
+    _ "github.com/peczenyj/runtimevar-consul/consulvar" // registers the consul:// scheme
     "gocloud.dev/runtimevar"
 )
 

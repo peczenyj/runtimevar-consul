@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/consul/api"
 	"gocloud.dev/runtimevar"
 
-	"github.com/peczenyj/runtimevar-contrib/consulvar"
+	"github.com/peczenyj/runtimevar-consul/consulvar"
 )
 
 // ExampleOpenVariable watches a key with a Consul client you construct and own.
@@ -39,7 +39,7 @@ func ExampleOpenVariable() {
 // blank import of consulvar registers the "consul" scheme; connection settings
 // come from the standard Consul environment variables.
 func Example_openVariableFromURL() {
-	// import _ "github.com/peczenyj/runtimevar-contrib/consulvar"
+	// import _ "github.com/peczenyj/runtimevar-consul/consulvar"
 
 	ctx := context.Background()
 

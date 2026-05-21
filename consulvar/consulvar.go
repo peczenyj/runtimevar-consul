@@ -35,7 +35,7 @@ import (
 	"github.com/hashicorp/consul/api"
 	"gocloud.dev/runtimevar"
 
-	"github.com/peczenyj/runtimevar-contrib/consulvar/internal/driver"
+	"github.com/peczenyj/runtimevar-consul/consulvar/internal/driver"
 )
 
 // Options sets optional parameters for OpenVariable.

@@ -10,11 +10,13 @@ import (
 	"github.com/hashicorp/consul/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	tcconsul "github.com/testcontainers/testcontainers-go/modules/consul"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/log"
+	testcontainer_consul "github.com/testcontainers/testcontainers-go/modules/consul"
 	"gocloud.dev/gcerrors"
 	"gocloud.dev/runtimevar"
 
-	"github.com/peczenyj/runtimevar-contrib/consulvar"
+	"github.com/peczenyj/runtimevar-consul/consulvar"
 )
 
 const watchTimeout = 30 * time.Second
@@ -25,8 +27,18 @@ func startConsul(t *testing.T) (addr string, client *api.Client) {
 	t.Helper()
 	ctx := context.Background()
 
-	container, err := tcconsul.Run(ctx, tcconsul.DefaultBaseImage)
+	logger := log.TestLogger(t)
+
+	container, err := testcontainer_consul.Run(
+		ctx,
+		testcontainer_consul.DefaultBaseImage,
+		testcontainers.WithLogger(logger),
+	)
+
+	testcontainers.CleanupContainer(t, container)
+
 	require.NoError(t, err)
+
 	t.Cleanup(func() {
 		_ = container.Terminate(context.Background())
 	})

@@ -2,7 +2,7 @@
 // interface backed by HashiCorp Consul KV blocking queries.
 //
 // This package is internal to the consulvar module; importers should depend
-// on github.com/peczenyj/runtimevar-contrib/consulvar instead.
+// on github.com/peczenyj/runtimevar-consul/consulvar instead.
 package driver
 
 import (
