@@ -3,7 +3,7 @@ module github.com/peczenyj/runtimevar-contrib
 go 1.26
 
 require (
-	github.com/hashicorp/consul/api v1.34.2
+	github.com/hashicorp/consul/api v1.34.3
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go/modules/consul v0.42.0
 	gocloud.dev v0.45.0
