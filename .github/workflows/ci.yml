@@ -43,7 +43,12 @@ jobs:
           GOTOOLCHAIN: auto
         run: go install gotest.tools/gotestsum@latest
       - name: Run unit tests
-        run: gotestsum -- ./...
+        run: gotestsum -- ./... -race -covermode=atomic -count=1 -coverprofile=coverage.txt
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: peczenyj/runtimevar-consul
 
   integration:
     name: Integration tests (Go ${{ matrix.go-version }})
