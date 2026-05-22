@@ -47,6 +47,7 @@ Install the toolchain:
 ```bash
 go install gotest.tools/gotestsum@latest
 go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+go install github.com/vektra/mockery/v2@latest # only needed to regenerate mocks
 # task: https://taskfile.dev/installation/
 # git-cliff: https://git-cliff.org/docs/installation
 ```
