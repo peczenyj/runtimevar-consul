@@ -64,7 +64,7 @@ task format
 task changelog:unreleased
 ```
 
-Run `task ci` before pushing — it mirrors the GitHub Actions matrix and pins the toolchain to the minimum supported Go, so a dependency that raises the version floor fails locally instead of only in CI.
+Run `task ci` before pushing. GitHub Actions runs on `stable` Go only, so `task ci` is the only place the version floor is enforced: it pins the toolchain to the minimum supported Go, so a dependency that raises the floor fails here rather than slipping through CI unnoticed.
 
 ## Commit messages
 
