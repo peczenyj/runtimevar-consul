@@ -1,0 +1,15 @@
+issue-845-fix: true
+resolve-type-alias: false
+quiet: false
+disable-version-string: true
+mockname: "{{.InterfaceName}}"
+filename: "{{.InterfaceName | snakecase }}.go"
+outpkg: "{{.PackageName}}mock"
+with-expecter: true
+packages:
+  github.com/peczenyj/runtimevar-consul/consulvar/consulapi:
+    config:
+      dir: "mocks/{{.PackagePath}}"
+    interfaces:
+      ConsulKV:
+      ConsulClient:

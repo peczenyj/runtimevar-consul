@@ -21,7 +21,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: latest
+          version: v2.12.2
 
   test:
     name: Unit tests (Go ${{ matrix.go-version }})
@@ -42,8 +42,13 @@ jobs:
         env:
           GOTOOLCHAIN: auto
         run: go install gotest.tools/gotestsum@latest
+      - name: Install task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run unit tests
-        run: gotestsum -- ./... -race -covermode=atomic -count=1 -coverprofile=coverage.txt
+        run: task test:coverage
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
@@ -67,5 +72,10 @@ jobs:
         env:
           GOTOOLCHAIN: auto
         run: go install gotest.tools/gotestsum@latest
+      - name: Install task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run integration tests
-        run: gotestsum -- -tags=integration ./...
+        run: task test:integration

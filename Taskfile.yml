@@ -1,11 +1,12 @@
 version: '3'
 
 vars:
-  # Minimum supported Go version. Keep in sync with the `go` directive in
-  # go.mod and the lowest entry of the CI matrix in .github/workflows/ci.yml.
-  # `task ci` pins the toolchain to this version so a dependency that quietly
-  # raises the floor fails locally instead of only in CI.
-  GO_MIN: '1.26.0'
+  # PKG_LIST defines all project packages excluding generated mocks.
+  PKG_LIST:
+    sh: go list ./... | grep -v mocks/ | tr '\n' ' '
+  # PKG_PATH_LIST defines the directory paths for the packages in PKG_LIST.
+  PKG_PATH_LIST:
+    sh: go list -f '{{"{{.Dir}}"}}' {{.PKG_LIST}} | tr '\n' ' '
 
 tasks:
   default:
@@ -16,22 +17,52 @@ tasks:
   test:
     desc: "Run unit tests via gotestsum"
     cmds:
-      - gotestsum -- ./...
+      - gotestsum -- {{.PKG_PATH_LIST}} {{.CLI_ARGS}}
+
+  test:race:
+    desc: "Run unit tests with race detector"
+    cmds:
+      - gotestsum -- -race {{.PKG_PATH_LIST}} {{.CLI_ARGS}}
+
+  test:coverage:
+    desc: "Run unit tests with race detector and coverage report"
+    cmds:
+      - gotestsum -- -race -covermode=atomic -count=1 -coverprofile=coverage.txt {{.PKG_PATH_LIST}} {{.CLI_ARGS}}
 
   test:integration:
     desc: "Run unit + integration tests (requires Docker)"
     cmds:
-      - gotestsum -- -tags=integration ./...
+      - gotestsum -- -tags=integration {{.PKG_PATH_LIST}} {{.CLI_ARGS}}
+
+  clean:
+    desc: "Remove coverage artifacts"
+    cmds:
+      - rm -f coverage.* *.out *.coverprofile profile.cov
 
   lint:
     desc: "Run golangci-lint"
     cmds:
-      - golangci-lint run ./...
+      - golangci-lint run {{.PKG_PATH_LIST}}
+
+  lint:fix:
+    desc: "Run golangci-lint and auto-fix issues where possible"
+    cmds:
+      - golangci-lint run --fix {{.PKG_PATH_LIST}}
 
   format:
-    desc: "Format Go code with golangci-lint v2's built-in formatters"
+    desc: "Format Go code with golangci-lint's built-in formatters"
     cmds:
-      - golangci-lint fmt ./...
+      - golangci-lint fmt {{.PKG_PATH_LIST}}
+
+  generate:
+    desc: "Regenerate mocks with mockery (skipped when .mockery.yaml is absent)"
+    cmds:
+      - mockery
+    status:
+      # `status` marks a task up-to-date (and skips it) when every command
+      # exits 0. The negated test exits 0 only when .mockery.yaml is missing,
+      # so mockery runs exactly when the config file is present.
+      - test ! -f .mockery.yaml
 
   tidy:
     desc: "Run go mod tidy"
@@ -45,23 +76,18 @@ tasks:
       - git diff --exit-code go.mod go.sum
 
   ci:
-    desc: "Full pre-push gate: mirrors GitHub Actions on the minimum supported Go"
-    env:
-      # Pin the build/test toolchain to the floor. A dependency that requires a
-      # newer Go than GO_MIN fails here, the way the matrix's lowest job would.
-      GOTOOLCHAIN: 'go{{.GO_MIN}}'
+    desc: "Full pre-push gate: mirrors the GitHub Actions checks"
     cmds:
-      - go mod tidy
-      - git diff --exit-code go.mod go.sum
-      - golangci-lint run ./...
-      - go build ./...
-      - gotestsum -- ./...
-      - gotestsum -- -tags=integration ./...
+      - task: tidy:check
+      - task: lint
+      - go build {{.PKG_PATH_LIST}}
+      - task: test
+      - task: test:integration
 
   changelog:
     desc: "Regenerate CHANGELOG.md from git history"
     cmds:
-      - git cliff -o CHANGELOG.md
+      - git cliff -o CHANGELOG.md {{.CLI_ARGS}}
 
   changelog:unreleased:
     desc: "Preview the next release's changelog section"
