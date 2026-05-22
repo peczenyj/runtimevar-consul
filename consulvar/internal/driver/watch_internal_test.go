@@ -192,6 +192,27 @@ func TestWatchVariable_IndexResetEmitsState(t *testing.T) {
 	assert.Equal(t, "v1", v)
 }
 
+func TestWatchVariable_PropagatesQueryOptions(t *testing.T) {
+	f := newFakeConsul(t)
+	f.SetValue([]byte("v1"))
+	w := NewWatcher(f.client(t), "k", Config{
+		Decoder:    runtimevar.StringDecoder,
+		Datacenter: "dc1",
+		Namespace:  "team-a",
+		WaitTime:   30 * time.Second,
+	})
+
+	s, _ := w.WatchVariable(context.Background(), nil)
+	require.NotNil(t, s)
+
+	reqs := f.Requests()
+	require.NotEmpty(t, reqs)
+	last := reqs[len(reqs)-1]
+	assert.Equal(t, "dc1", last.DC, "datacenter should reach the Consul query")
+	assert.Equal(t, "team-a", last.NS, "namespace should reach the Consul query")
+	assert.NotEmpty(t, last.Wait, "wait_time should reach the Consul query")
+}
+
 func TestWatchVariable_Mocked(t *testing.T) {
 	mk := consulmock.NewConsulKV(t)
 	mc := consulmock.NewConsulClient(t)
