@@ -87,7 +87,7 @@ tasks:
   changelog:
     desc: "Regenerate CHANGELOG.md from git history"
     cmds:
-      - git cliff -o CHANGELOG.md
+      - git cliff -o CHANGELOG.md {{.CLI_ARGS}}
 
   changelog:unreleased:
     desc: "Preview the next release's changelog section"
