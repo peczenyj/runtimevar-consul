@@ -47,9 +47,10 @@ func (w *Watcher) WatchVariable(ctx context.Context, prev driver.State) (driver.
 			// suppress re-emitting the identical error even when meta.LastIndex
 			// advanced: that index is cluster-wide, so an unrelated KV write
 			// bumps it while our key's existence is unchanged. Advance the wait
-			// index so the next blocking query waits past the new index.
+			// index (floored, so a zero index never makes the next query
+			// non-blocking) so the next blocking query waits past the new index.
 			if errors.Is(prevErr, errKeyNotFound) {
-				waitIndex = meta.LastIndex
+				waitIndex = nextBlockingIndex(meta.LastIndex)
 				continue
 			}
 			w.failures = 0
@@ -72,6 +73,18 @@ func (w *Watcher) WatchVariable(ctx context.Context, prev driver.State) (driver.
 		}
 		return &state{val: v, raw: kv, modifyIndex: kv.ModifyIndex, updated: now}, 0
 	}
+}
+
+// nextBlockingIndex returns a WaitIndex safe to re-use for the next blocking
+// query. Consul's blocking-query protocol requires clients to treat any index
+// below 1 as 1: a WaitIndex of 0 makes the query return immediately, which
+// would turn this poll loop into a busy spin if a server ever reports
+// LastIndex 0 for a missing key.
+func nextBlockingIndex(idx uint64) uint64 {
+	if idx < 1 {
+		return 1
+	}
+	return idx
 }
 
 // backoff returns the wait time after `failures` consecutive transport errors.

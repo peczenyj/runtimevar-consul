@@ -116,6 +116,29 @@ func TestWatchVariable_NotFound_UnrelatedIndexChange_Suppressed(t *testing.T) {
 	assert.Nil(t, s2, "still-absent key must not re-emit NotFound on an unrelated index bump")
 }
 
+func TestWatchVariable_NotFound_ZeroIndexDoesNotBusyLoop(t *testing.T) {
+	f := newFakeConsul(t)
+	// A never-existing key: the fake returns X-Consul-Index: 0 on every
+	// response. A WaitIndex of 0 is non-blocking, so without the index floor
+	// the poll loop spins as fast as HTTP round-trips allow.
+	w := NewWatcher(f.client(t), "missing", Config{Decoder: runtimevar.StringDecoder})
+
+	s1, _ := w.WatchVariable(context.Background(), nil)
+	require.NotNil(t, s1)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+	s2, _ := w.WatchVariable(ctx, s1)
+	assert.Nil(t, s2)
+
+	// With the index floored to 1, each poll blocks (~50ms in the fake), so the
+	// 200ms window yields only a handful of requests. A busy loop would issue
+	// hundreds to thousands.
+	reqs := f.Requests()
+	assert.Less(t, len(reqs), 20,
+		"zero-index NotFound must block between polls, not busy-loop (got %d requests)", len(reqs))
+}
+
 func TestWatchVariable_KeyAppears(t *testing.T) {
 	f := newFakeConsul(t)
 	w := NewWatcher(f.client(t), "k", Config{Decoder: runtimevar.StringDecoder})
