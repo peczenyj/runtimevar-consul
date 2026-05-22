@@ -9,57 +9,64 @@ import (
 	"gocloud.dev/runtimevar/driver"
 )
 
-// WatchVariable performs one Consul blocking query and returns the resulting
-// driver.State. See the package-level comment for the full state machine.
+// WatchVariable performs Consul blocking queries and returns the resulting
+// driver.State. It blocks until the variable changes in a way that yields a
+// new value or a different error, or until ctx is done.
 func (w *Watcher) WatchVariable(ctx context.Context, prev driver.State) (driver.State, time.Duration) {
 	var waitIndex uint64
+	var prevErr error
 	if p, ok := prev.(*state); ok {
 		waitIndex = p.modifyIndex
+		prevErr = p.err
 	}
 
-	qo := w.baseQuery
-	qo.WaitIndex = waitIndex
-	kv, meta, err := w.client.KV().Get(w.key, qo.WithContext(ctx))
+	for {
+		qo := w.baseQuery
+		qo.WaitIndex = waitIndex
+		kv, meta, err := w.client.KV().Get(w.key, qo.WithContext(ctx))
 
-	now := time.Now()
-	if ctx.Err() != nil {
-		return nil, 0
-	}
-	if err != nil {
-		w.failures++
-		return &state{err: err, updated: now}, backoff(w.failures)
-	}
-
-	// Index-reset safety: per Consul docs, if meta.LastIndex < waitIndex the
-	// cluster's index has reset and the comparison is invalid.
-	//
-	// meta is always non-nil here: api.Client.KV().Get returns a populated
-	// *QueryMeta even on 404 (the X-Consul-Index header is still present).
-	effectivePrev := waitIndex
-	if meta.LastIndex < waitIndex {
-		effectivePrev = 0
-	}
-
-	if kv == nil {
-		nfErr := fmt.Errorf("consulvar: key %q: %w", w.key, errKeyNotFound)
-		if p, ok := prev.(*state); ok && errors.Is(p.err, errKeyNotFound) && effectivePrev == meta.LastIndex {
+		now := time.Now()
+		if ctx.Err() != nil {
 			return nil, 0
 		}
-		w.failures = 0
-		return &state{err: nfErr, modifyIndex: meta.LastIndex, updated: now}, 0
-	}
+		if err != nil {
+			w.failures++
+			return &state{err: err, updated: now}, backoff(w.failures)
+		}
 
-	if effectivePrev == kv.ModifyIndex {
-		w.failures = 0
-		return nil, 0
-	}
+		// Index-reset safety: per Consul docs, if meta.LastIndex < waitIndex the
+		// cluster's index has reset and the comparison is invalid.
+		effectivePrev := waitIndex
+		if meta.LastIndex < waitIndex {
+			effectivePrev = 0
+		}
 
-	v, decErr := w.decoder.Decode(ctx, kv.Value)
-	w.failures = 0
-	if decErr != nil {
-		return &state{err: decErr, modifyIndex: kv.ModifyIndex, updated: now}, 0
+		if kv == nil {
+			nfErr := fmt.Errorf("consulvar: key %q: %w", w.key, errKeyNotFound)
+			if errors.Is(prevErr, errKeyNotFound) && effectivePrev == meta.LastIndex {
+				waitIndex = meta.LastIndex
+				continue
+			}
+			w.failures = 0
+			return &state{err: nfErr, modifyIndex: meta.LastIndex, updated: now}, 0
+		}
+
+		if effectivePrev == kv.ModifyIndex {
+			waitIndex = kv.ModifyIndex
+			continue
+		}
+
+		v, decErr := w.decoder.Decode(ctx, kv.Value)
+		w.failures = 0
+		if decErr != nil {
+			if prevErr != nil && prevErr.Error() == decErr.Error() {
+				waitIndex = kv.ModifyIndex
+				continue
+			}
+			return &state{err: decErr, modifyIndex: kv.ModifyIndex, updated: now}, 0
+		}
+		return &state{val: v, raw: kv, modifyIndex: kv.ModifyIndex, updated: now}, 0
 	}
-	return &state{val: v, raw: kv, modifyIndex: kv.ModifyIndex, updated: now}, 0
 }
 
 // backoff returns the wait time after `failures` consecutive transport errors.

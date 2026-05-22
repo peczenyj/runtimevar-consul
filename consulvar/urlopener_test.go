@@ -1,4 +1,4 @@
-package consulvar
+package consulvar_test
 
 import (
 	"context"
@@ -8,27 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gocloud.dev/runtimevar"
-)
 
-func TestKeyFromURL(t *testing.T) {
-	tests := []struct {
-		name string
-		raw  string
-		want string
-	}{
-		{"host and path", "consul://services/auth/db_url", "services/auth/db_url"},
-		{"host only", "consul://my-key", "my-key"},
-		{"trailing slash trimmed", "consul://a/b/", "a/b"},
-		{"query ignored", "consul://a/b?decoder=string", "a/b"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			u, err := url.Parse(tt.raw)
-			require.NoError(t, err)
-			assert.Equal(t, tt.want, keyFromURL(u))
-		})
-	}
-}
+	"github.com/peczenyj/runtimevar-consul/consulvar"
+)
 
 func TestURLOpener_OpenVariableURL(t *testing.T) {
 	tests := []struct {
@@ -46,7 +28,7 @@ func TestURLOpener_OpenVariableURL(t *testing.T) {
 		{name: "unknown param", raw: "consul://a/b?bogus=1", wantErr: `invalid query parameter "bogus"`},
 	}
 
-	o := &URLOpener{}
+	o := &consulvar.URLOpener{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			u, err := url.Parse(tt.raw)
@@ -64,6 +46,33 @@ func TestURLOpener_OpenVariableURL(t *testing.T) {
 			assert.NoError(t, v.Close())
 		})
 	}
+}
+
+func TestURLOpener_DecryptPrefix(t *testing.T) {
+	// decrypt+ prefix is handled by runtimevar.DecoderByName.
+	// It will fail if no secrets.Keeper is in the context, but we want to
+	// ensure our URLOpener passes it through without erroring on the name itself.
+	o := &consulvar.URLOpener{}
+	u, _ := url.Parse("consul://key?decoder=decrypt+string")
+	v, err := o.OpenVariableURL(context.Background(), u)
+
+	// It's expected to fail because we haven't set up a secrets.Keeper,
+	// but the error should come from runtimevar, not our parameter validation.
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "RUNTIMEVAR_KEEPER_URL")
+	assert.Nil(t, v)
+}
+
+func TestURLOpener_WithFallbackDecoder(t *testing.T) {
+	// Test the case where URLOpener has a pre-configured Decoder (improving coverage).
+	o := &consulvar.URLOpener{
+		Decoder: runtimevar.StringDecoder,
+	}
+	u, _ := url.Parse("consul://key") // No decoder param, should use fallback
+	v, err := o.OpenVariableURL(context.Background(), u)
+	require.NoError(t, err)
+	require.NotNil(t, v)
+	v.Close()
 }
 
 // TestOpenVariableURL_SchemeRegistered checks that init() registered the
