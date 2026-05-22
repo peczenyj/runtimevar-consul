@@ -10,7 +10,7 @@
 [![Dependency Review](https://github.com/peczenyj/runtimevar-consul/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/peczenyj/runtimevar-consul/actions/workflows/dependency-review.yml)
 [![License](https://img.shields.io/github/license/peczenyj/runtimevar-consul)](./LICENSE)
 
-Third-party drivers for [`gocloud.dev/runtimevar`](https://pkg.go.dev/gocloud.dev/runtimevar).
+Third-party driver for [`gocloud.dev/runtimevar`](https://pkg.go.dev/gocloud.dev/runtimevar) to read from consul kv.
 
 | Driver | Backend | Import |
 |---|---|---|
