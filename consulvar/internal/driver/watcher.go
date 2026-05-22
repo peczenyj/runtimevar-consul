@@ -43,7 +43,12 @@ func (w *Watcher) WatchVariable(ctx context.Context, prev driver.State) (driver.
 
 		if kv == nil {
 			nfErr := fmt.Errorf("consulvar: key %q: %w", w.key, errKeyNotFound)
-			if errors.Is(prevErr, errKeyNotFound) && effectivePrev == meta.LastIndex {
+			// The key is (still) absent. If we already reported NotFound,
+			// suppress re-emitting the identical error even when meta.LastIndex
+			// advanced: that index is cluster-wide, so an unrelated KV write
+			// bumps it while our key's existence is unchanged. Advance the wait
+			// index so the next blocking query waits past the new index.
+			if errors.Is(prevErr, errKeyNotFound) {
 				waitIndex = meta.LastIndex
 				continue
 			}

@@ -92,6 +92,30 @@ func TestWatchVariable_NotFound_StableSameIndex(t *testing.T) {
 	assert.Nil(t, s2)
 }
 
+func TestWatchVariable_NotFound_UnrelatedIndexChange_Suppressed(t *testing.T) {
+	f := newFakeConsul(t)
+	// Key exists then is removed, so the cluster index is non-zero while the
+	// key is absent.
+	f.SetValue([]byte("v1"))
+	f.DeleteKey()
+	w := NewWatcher(f.client(t), "k", Config{Decoder: runtimevar.StringDecoder})
+
+	s1, _ := w.WatchVariable(context.Background(), nil)
+	require.NotNil(t, s1)
+	_, err := s1.Value()
+	require.Error(t, err)
+	assert.Equal(t, gcerrors.NotFound, w.ErrorCode(err))
+
+	// An unrelated KV write bumps the cluster index while our key stays absent.
+	// The watcher must not re-emit the identical NotFound error.
+	f.DeleteKey()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+	s2, _ := w.WatchVariable(ctx, s1)
+	assert.Nil(t, s2, "still-absent key must not re-emit NotFound on an unrelated index bump")
+}
+
 func TestWatchVariable_KeyAppears(t *testing.T) {
 	f := newFakeConsul(t)
 	w := NewWatcher(f.client(t), "k", Config{Decoder: runtimevar.StringDecoder})
