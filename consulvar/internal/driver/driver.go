@@ -10,6 +10,8 @@ import (
 
 	"github.com/hashicorp/consul/api"
 	"gocloud.dev/runtimevar"
+
+	"github.com/peczenyj/runtimevar-consul/consulvar/consulapi"
 )
 
 // Config carries the optional knobs forwarded from the public consulvar
@@ -24,7 +26,7 @@ type Config struct {
 // Watcher implements gocloud.dev/runtimevar/driver.Watcher for a single
 // Consul KV key using a blocking query (WaitIndex) per WatchVariable call.
 type Watcher struct {
-	client    *api.Client
+	client    consulapi.ConsulClient
 	key       string
 	decoder   *runtimevar.Decoder
 	baseQuery api.QueryOptions
@@ -34,10 +36,17 @@ type Watcher struct {
 	failures int
 }
 
+// apiClient wraps *api.Client to satisfy consulapi.ConsulClient.
+type apiClient struct {
+	c *api.Client
+}
+
+func (a *apiClient) KV() consulapi.ConsulKV { return a.c.KV() }
+
 // NewWatcher constructs a Watcher. The caller owns client; Close is a no-op.
 func NewWatcher(client *api.Client, key string, cfg Config) *Watcher {
 	return &Watcher{
-		client:  client,
+		client:  &apiClient{c: client},
 		key:     key,
 		decoder: cfg.Decoder,
 		baseQuery: api.QueryOptions{

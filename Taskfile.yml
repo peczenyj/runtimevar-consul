@@ -6,6 +6,12 @@ vars:
   # `task ci` pins the toolchain to this version so a dependency that quietly
   # raises the floor fails locally instead of only in CI.
   GO_MIN: '1.26.0'
+  # PKG_LIST defines all project packages excluding generated mocks.
+  PKG_LIST:
+    sh: go list ./... | grep -v mocks/ | tr '\n' ' '
+  # PKG_PATH_LIST defines the directory paths for the packages in PKG_LIST.
+  PKG_PATH_LIST:
+    sh: go list -f '{{"{{.Dir}}"}}' {{.PKG_LIST}} | tr '\n' ' '
 
 tasks:
   default:
@@ -16,22 +22,22 @@ tasks:
   test:
     desc: "Run unit tests via gotestsum"
     cmds:
-      - gotestsum -- ./...
+      - gotestsum -- {{.PKG_PATH_LIST}} {{.CLI_ARGS}}
 
   test:integration:
     desc: "Run unit + integration tests (requires Docker)"
     cmds:
-      - gotestsum -- -tags=integration ./...
+      - gotestsum -- -tags=integration {{.PKG_PATH_LIST}} {{.CLI_ARGS}}
 
   lint:
     desc: "Run golangci-lint"
     cmds:
-      - golangci-lint run ./...
+      - golangci-lint run {{.PKG_PATH_LIST}}
 
   format:
     desc: "Format Go code with golangci-lint v2's built-in formatters"
     cmds:
-      - golangci-lint fmt ./...
+      - golangci-lint fmt {{.PKG_PATH_LIST}}
 
   tidy:
     desc: "Run go mod tidy"
@@ -53,10 +59,10 @@ tasks:
     cmds:
       - go mod tidy
       - git diff --exit-code go.mod go.sum
-      - golangci-lint run ./...
-      - go build ./...
-      - gotestsum -- ./...
-      - gotestsum -- -tags=integration ./...
+      - golangci-lint run {{.PKG_PATH_LIST}}
+      - go build {{.PKG_PATH_LIST}}
+      - gotestsum -- {{.PKG_PATH_LIST}}
+      - gotestsum -- -tags=integration {{.PKG_PATH_LIST}}
 
   changelog:
     desc: "Regenerate CHANGELOG.md from git history"
