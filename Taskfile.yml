@@ -2,9 +2,10 @@ version: '3'
 
 vars:
   # Minimum supported Go version. Keep in sync with the `go` directive in
-  # go.mod and the lowest entry of the CI matrix in .github/workflows/ci.yml.
-  # `task ci` pins the toolchain to this version so a dependency that quietly
-  # raises the floor fails locally instead of only in CI.
+  # go.mod. GitHub Actions runs on `stable` only, so `task ci` is the sole
+  # place the floor is enforced: it pins the toolchain to this version, making
+  # a dependency that quietly raises the floor fail locally. Run it before
+  # pushing.
   GO_MIN: '1.26.0'
   # PKG_LIST defines all project packages excluding generated mocks.
   PKG_LIST:

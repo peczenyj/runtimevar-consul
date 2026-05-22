@@ -70,6 +70,27 @@ func TestErrorAs_AlwaysFalse(t *testing.T) {
 	assert.False(t, w.ErrorAs(errors.New("anything"), &target))
 }
 
+func TestBackoff_Table(t *testing.T) {
+	cases := []struct {
+		name     string
+		failures int
+		want     time.Duration
+	}{
+		{"none", 0, 0},
+		{"negative", -1, 0},
+		{"first", 1, time.Second},
+		{"second", 2, 2 * time.Second},
+		{"third", 3, 4 * time.Second},
+		{"capped", 6, 30 * time.Second},
+		{"overflow", 64, 30 * time.Second},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, backoff(tc.failures))
+		})
+	}
+}
+
 func TestErrorCode_Table(t *testing.T) {
 	w := newTestWatcher(t)
 	cases := []struct {
