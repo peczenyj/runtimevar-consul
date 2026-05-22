@@ -77,10 +77,6 @@ tasks:
 
   ci:
     desc: "Full pre-push gate: mirrors the GitHub Actions checks"
-    env:
-      # Match the workflow: let Go fetch a newer toolchain if a dependency
-      # requires one, rather than pinning to a specific version.
-      GOTOOLCHAIN: auto
     cmds:
       - task: tidy:check
       - task: lint
