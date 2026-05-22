@@ -91,6 +91,23 @@ func TestBackoff_Table(t *testing.T) {
 	}
 }
 
+func TestNextBlockingIndex(t *testing.T) {
+	cases := []struct {
+		name string
+		idx  uint64
+		want uint64
+	}{
+		{"zero floored to one", 0, 1},
+		{"one unchanged", 1, 1},
+		{"non-zero unchanged", 42, 42},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, nextBlockingIndex(tc.idx))
+		})
+	}
+}
+
 func TestErrorCode_Table(t *testing.T) {
 	w := newTestWatcher(t)
 	cases := []struct {
