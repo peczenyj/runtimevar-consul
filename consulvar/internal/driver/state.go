@@ -14,6 +14,7 @@ type state struct {
 	// queries across WatchVariable calls.
 	modifyIndex uint64
 	raw         *api.KVPair
+	meta        *api.QueryMeta
 	updated     time.Time
 }
 
@@ -27,12 +28,16 @@ func (s *state) Value() (any, error) {
 func (s *state) UpdateTime() time.Time { return s.updated }
 
 // As supports `**api.KVPair` so callers can reach the underlying Flags,
-// Session, etc. from the last observed pair. Returns false otherwise.
+// Session, etc. from the last observed pair. It also supports `**api.QueryMeta`
+// to access request metrics. Returns false otherwise.
 func (s *state) As(i any) bool {
-	p, ok := i.(**api.KVPair)
-	if !ok {
-		return false
+	if p, ok := i.(**api.KVPair); ok {
+		*p = s.raw
+		return true
 	}
-	*p = s.raw
-	return true
+	if p, ok := i.(**api.QueryMeta); ok {
+		*p = s.meta
+		return true
+	}
+	return false
 }

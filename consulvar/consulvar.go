@@ -27,6 +27,9 @@
 // consulvar exposes the underlying Consul pair through Snapshot.As: pass a
 // **github.com/hashicorp/consul/api.KVPair to reach Flags, Session, and the
 // other fields of the last observed pair.
+//
+// You can also pass a **github.com/hashicorp/consul/api.QueryMeta to extract
+// Consul query metrics like RequestTime and KnownLeader for successful reads.
 package consulvar
 
 import (
