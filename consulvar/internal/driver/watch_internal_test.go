@@ -287,6 +287,11 @@ func TestWatchVariable_Mocked(t *testing.T) {
 	v, err := s.Value()
 	require.NoError(t, err)
 	assert.Equal(t, "mocked-value", v)
+
+	var meta *api.QueryMeta
+	require.True(t, s.As(&meta))
+	require.NotNil(t, meta)
+	assert.Equal(t, uint64(456), meta.LastIndex)
 }
 
 func TestWatchVariable_Mocked_TransportError(t *testing.T) {
