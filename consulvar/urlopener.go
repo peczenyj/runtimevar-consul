@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"path"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/consul/api"
@@ -54,6 +55,14 @@ func (o *URLOpener) OpenVariableURL(ctx context.Context, u *url.URL) (*runtimeva
 	if ns := q.Get("namespace"); ns != "" {
 		opts.Namespace = ns
 		q.Del("namespace")
+	}
+	if stale := q.Get("allow_stale"); stale != "" {
+		b, err := strconv.ParseBool(stale)
+		if err != nil {
+			return nil, fmt.Errorf("open variable %q: invalid allow_stale: %w", u, err)
+		}
+		opts.AllowStale = b
+		q.Del("allow_stale")
 	}
 	if wt := q.Get("wait_time"); wt != "" {
 		d, err := time.ParseDuration(wt)
