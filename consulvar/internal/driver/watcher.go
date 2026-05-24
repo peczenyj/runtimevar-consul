@@ -54,7 +54,7 @@ func (w *Watcher) WatchVariable(ctx context.Context, prev driver.State) (driver.
 				continue
 			}
 			w.failures = 0
-			return &state{err: nfErr, modifyIndex: meta.LastIndex, updated: now}, 0
+			return &state{err: nfErr, modifyIndex: meta.LastIndex, meta: meta, updated: now}, 0
 		}
 
 		if effectivePrev == kv.ModifyIndex {
@@ -69,9 +69,9 @@ func (w *Watcher) WatchVariable(ctx context.Context, prev driver.State) (driver.
 				waitIndex = kv.ModifyIndex
 				continue
 			}
-			return &state{err: decErr, modifyIndex: kv.ModifyIndex, updated: now}, 0
+			return &state{err: decErr, modifyIndex: kv.ModifyIndex, raw: kv, meta: meta, updated: now}, 0
 		}
-		return &state{val: v, raw: kv, modifyIndex: kv.ModifyIndex, updated: now}, 0
+		return &state{val: v, raw: kv, meta: meta, modifyIndex: kv.ModifyIndex, updated: now}, 0
 	}
 }
 

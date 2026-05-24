@@ -117,7 +117,7 @@ func TestIntegration(t *testing.T) {
 		assert.Equal(t, "now-here", snap.Value.(string))
 	})
 
-	t.Run("As exposes the underlying KVPair", func(t *testing.T) {
+	t.Run("As exposes the underlying KVPair and QueryMeta", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), watchTimeout)
 		defer cancel()
 
@@ -136,6 +136,12 @@ func TestIntegration(t *testing.T) {
 		require.NotNil(t, pair)
 		assert.Equal(t, key, pair.Key)
 		assert.Equal(t, []byte("payload"), pair.Value)
+
+		var meta *api.QueryMeta
+		require.True(t, snap.As(&meta))
+		require.NotNil(t, meta)
+		assert.NotZero(t, meta.RequestTime)
+		assert.NotZero(t, meta.LastIndex)
 	})
 
 	t.Run("URL opener resolves via CONSUL_HTTP_ADDR", func(t *testing.T) {
