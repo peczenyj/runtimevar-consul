@@ -42,13 +42,14 @@ func main() {
 The opener reads Consul connection info from the standard environment variables (`CONSUL_HTTP_ADDR`, `CONSUL_HTTP_TOKEN`, …) via `api.DefaultConfig()`. For more control, construct a `*consul/api.Client` yourself and call `consulvar.OpenVariable(client, key, opts)`.
 
 ## Development
-
 Install the toolchain:
 
 ```bash
 go install gotest.tools/gotestsum@latest
-go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+# See https://golangci-lint.run/welcome/install/#local-installation
+curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.64.5
 go install github.com/vektra/mockery/v2@latest # only needed to regenerate mocks
+```
 # task: https://taskfile.dev/installation/
 # git-cliff: https://git-cliff.org/docs/installation
 ```
