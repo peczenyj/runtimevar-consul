@@ -50,8 +50,9 @@ type Options struct {
 	// Namespace, if set, selects the Consul Enterprise namespace.
 	Namespace string
 
-	// WaitTime caps the duration of each blocking query. Zero uses Consul's
-	// server-side default (typically 5 minutes).
+	// WaitTime caps the duration of each blocking query (the 'wait' parameter
+	// in Consul KV queries). Zero uses Consul's server-side default (typically
+	// 5 minutes).
 	WaitTime time.Duration
 }
 
