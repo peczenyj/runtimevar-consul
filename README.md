@@ -10,7 +10,7 @@
 [![Dependency Review](https://github.com/peczenyj/runtimevar-consul/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/peczenyj/runtimevar-consul/actions/workflows/dependency-review.yml)
 [![License](https://img.shields.io/github/license/peczenyj/runtimevar-consul)](./LICENSE)
 
-Third-party driver for [`gocloud.dev/runtimevar`](https://pkg.go.dev/gocloud.dev/runtimevar) to read from consul kv.
+Third-party driver for [`gocloud.dev/runtimevar`](https://pkg.go.dev/gocloud.dev/runtimevar) to read from Consul KV.
 
 | Driver | Backend | Import |
 |---|---|---|
@@ -21,6 +21,7 @@ Third-party driver for [`gocloud.dev/runtimevar`](https://pkg.go.dev/gocloud.dev
 ```go
 import (
     "context"
+    "fmt"
 
     _ "github.com/peczenyj/runtimevar-consul/consulvar" // registers the consul:// scheme
     "gocloud.dev/runtimevar"
@@ -34,7 +35,7 @@ func main() {
 
     snap, err := v.Latest(ctx)
     if err != nil { panic(err) }
-    println(snap.Value.(string))
+    fmt.Println(snap.Value.(string))
 }
 ```
 
@@ -46,7 +47,7 @@ Install the toolchain:
 
 ```bash
 go install gotest.tools/gotestsum@latest
-go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 go install github.com/vektra/mockery/v2@latest # only needed to regenerate mocks
 # task: https://taskfile.dev/installation/
 # git-cliff: https://git-cliff.org/docs/installation
