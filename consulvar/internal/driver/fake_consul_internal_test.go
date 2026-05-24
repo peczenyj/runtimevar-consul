@@ -41,6 +41,7 @@ type recordedRequest struct {
 	Wait      string
 	DC        string
 	NS        string
+	Stale     string
 }
 
 func newFakeConsul(t *testing.T) *fakeConsul {
@@ -131,6 +132,7 @@ func (f *fakeConsul) handle(w http.ResponseWriter, r *http.Request) {
 		Wait:      q.Get("wait"),
 		DC:        q.Get("dc"),
 		NS:        q.Get("ns"),
+		Stale:     strconv.FormatBool(q.Has("stale")),
 	}
 
 	f.mu.Lock()

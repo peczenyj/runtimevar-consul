@@ -20,6 +20,7 @@ type Config struct {
 	Decoder    *runtimevar.Decoder
 	Datacenter string
 	Namespace  string
+	AllowStale bool
 	WaitTime   time.Duration
 }
 
@@ -52,6 +53,7 @@ func NewWatcher(client *api.Client, key string, cfg Config) *Watcher {
 		baseQuery: api.QueryOptions{
 			Datacenter: cfg.Datacenter,
 			Namespace:  cfg.Namespace,
+			AllowStale: cfg.AllowStale,
 			WaitTime:   cfg.WaitTime,
 		},
 	}

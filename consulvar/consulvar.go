@@ -15,6 +15,7 @@
 //     "decrypt+<decoder>" prefix is also accepted. See runtimevar.DecoderByName.
 //   - datacenter:  the Consul datacenter to query.
 //   - namespace:   the Consul Enterprise namespace.
+//   - allow_stale: whether to allow stale reads ("true" or "false").
 //   - wait_time:   max blocking-query duration, e.g. "30s"; see time.ParseDuration.
 //
 // Example:
@@ -49,6 +50,10 @@ type Options struct {
 
 	// Namespace, if set, selects the Consul Enterprise namespace.
 	Namespace string
+
+	// AllowStale allows Consul to return stale data from any server, scaling
+	// read throughput at the cost of potential consistency delays.
+	AllowStale bool
 
 	// WaitTime caps the duration of each blocking query (the 'wait' parameter
 	// in Consul KV queries). Zero uses Consul's server-side default (typically

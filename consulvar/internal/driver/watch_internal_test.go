@@ -246,6 +246,7 @@ func TestWatchVariable_PropagatesQueryOptions(t *testing.T) {
 		Decoder:    runtimevar.StringDecoder,
 		Datacenter: "dc1",
 		Namespace:  "team-a",
+		AllowStale: true,
 		WaitTime:   30 * time.Second,
 	})
 
@@ -257,6 +258,7 @@ func TestWatchVariable_PropagatesQueryOptions(t *testing.T) {
 	last := reqs[len(reqs)-1]
 	assert.Equal(t, "dc1", last.DC, "datacenter should reach the Consul query")
 	assert.Equal(t, "team-a", last.NS, "namespace should reach the Consul query")
+	assert.Equal(t, "true", last.Stale, "allow_stale should reach the Consul query")
 	assert.NotEmpty(t, last.Wait, "wait_time should reach the Consul query")
 }
 
