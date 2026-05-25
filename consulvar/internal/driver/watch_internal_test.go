@@ -243,12 +243,12 @@ func TestWatchVariable_PropagatesQueryOptions(t *testing.T) {
 	f := newFakeConsul(t)
 	f.SetValue([]byte("v1"))
 	w := NewWatcher(f.client(t), "k", Config{
-		Decoder:    runtimevar.StringDecoder,
-		Datacenter: "dc1",
-		Namespace:  "team-a",
-		AllowStale: true,
-		WaitTime:   30 * time.Second,
-		Token:      "secret-token",
+		Decoder:           runtimevar.StringDecoder,
+		Datacenter:        "dc1",
+		Namespace:         "team-a",
+		AllowStale:        true,
+		WaitTime:          30 * time.Second,
+		Token:             "secret-token",
 		RequireConsistent: true,
 	})
 
