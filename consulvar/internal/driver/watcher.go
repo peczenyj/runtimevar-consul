@@ -33,6 +33,9 @@ func (w *Watcher) WatchVariable(ctx context.Context, prev driver.State) (driver.
 			w.failures++
 			return &state{err: err, updated: now}, backoff(w.failures)
 		}
+		// A successful round-trip clears the backoff schedule, including on the
+		// poll-again paths below that loop without returning a new state.
+		w.failures = 0
 
 		// Index-reset safety: per Consul docs, if meta.LastIndex < waitIndex the
 		// cluster's index has reset and the comparison is invalid.
@@ -53,7 +56,6 @@ func (w *Watcher) WatchVariable(ctx context.Context, prev driver.State) (driver.
 				waitIndex = nextBlockingIndex(meta.LastIndex)
 				continue
 			}
-			w.failures = 0
 			return &state{err: nfErr, modifyIndex: meta.LastIndex, meta: meta, updated: now}, 0
 		}
 
@@ -63,7 +65,6 @@ func (w *Watcher) WatchVariable(ctx context.Context, prev driver.State) (driver.
 		}
 
 		v, decErr := w.decoder.Decode(ctx, kv.Value)
-		w.failures = 0
 		if decErr != nil {
 			if prevErr != nil && prevErr.Error() == decErr.Error() {
 				waitIndex = kv.ModifyIndex
