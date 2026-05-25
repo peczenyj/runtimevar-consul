@@ -317,6 +317,40 @@ func TestWatchVariable_Mocked_TransportError(t *testing.T) {
 	assert.Equal(t, time.Second, wait)
 }
 
+// https://github.com/peczenyj/runtimevar-consul/issues/27
+// A successful poll must reset the consecutive-failure counter, so a later
+// transport error restarts the backoff at 1s rather than escalating.
+func TestWatchVariable_BackoffResetsAfterSuccessfulPoll_Issue27(t *testing.T) {
+	mk := consulmock.NewConsulKV(t)
+	mc := consulmock.NewConsulClient(t)
+	w := &Watcher{
+		client:  mc,
+		key:     "k",
+		decoder: runtimevar.StringDecoder,
+	}
+
+	mc.EXPECT().KV().Return(mk)
+
+	boom := errors.New("network failure")
+	// Call A: transport error -> failures becomes 1, backoff 1s.
+	mk.EXPECT().Get("k", mock.Anything).Return(nil, nil, boom).Once()
+	// Call B, first poll: a successful but unchanged read (ModifyIndex == prev).
+	mk.EXPECT().Get("k", mock.Anything).Return(
+		&api.KVPair{Key: "k", Value: []byte("v"), ModifyIndex: 5},
+		&api.QueryMeta{LastIndex: 5},
+		nil,
+	).Once()
+	// Call B, second poll: transport error again.
+	mk.EXPECT().Get("k", mock.Anything).Return(nil, nil, boom).Once()
+
+	_, waitA := w.WatchVariable(context.Background(), nil)
+	require.Equal(t, time.Second, waitA)
+
+	_, waitB := w.WatchVariable(context.Background(), &state{modifyIndex: 5})
+	assert.Equal(t, time.Second, waitB,
+		"a successful poll must reset backoff; expected 1s, the schedule must not escalate to 2s")
+}
+
 func TestWatchVariable_Mocked_IndexReset(t *testing.T) {
 	mk := consulmock.NewConsulKV(t)
 	mc := consulmock.NewConsulClient(t)
