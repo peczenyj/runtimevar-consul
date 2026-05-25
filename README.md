@@ -79,13 +79,29 @@ This repo follows [Conventional Commits](https://www.conventionalcommits.org/) s
 
 ## Releasing
 
-1. On `devel`: `task changelog:unreleased` to sanity-check the upcoming section.
-2. Open a PR `devel` → `main`.
-3. Merge with a merge commit titled `release: vX.Y.Z`.
-4. On `main`: `task changelog` to regenerate the full `CHANGELOG.md`; commit it.
-5. Tag `vX.Y.Z` on `main`; push the tag.
-6. The `release.yml` workflow publishes the GitHub Release from `git cliff --latest`.
-7. Fast-forward `main` back into `devel`.
+Releases use [git-flow (AVH)](https://github.com/petervanderdoes/gitflow-avh).
+The repository is configured with `main` as the production branch, `devel` as
+the development branch, and `v` as the version-tag prefix; `release.finish.push`
+is enabled, so finishing a release pushes `main`, `devel`, and the tag.
+
+```bash
+# 1. preview the upcoming changelog section
+task changelog:unreleased
+
+# 2. start the release off devel (omit the leading v; the tag is prefixed for you)
+git flow release start X.Y.Z
+
+# 3. regenerate the changelog on the release branch and commit it
+task changelog -- --tag vX.Y.Z
+git commit -am "chore: update changelog for vX.Y.Z"
+
+# 4. finish: merge into main, tag vX.Y.Z, back-merge into devel, push all three
+git flow release finish X.Y.Z
+```
+
+The `release.yml` workflow, triggered by the `vX.Y.Z` tag, then publishes the
+GitHub Release with a source archive, `SHA256SUMS`, and signed SLSA build
+provenance. Verify a release as described in [`SECURITY.md`](./SECURITY.md).
 
 ## License
 
