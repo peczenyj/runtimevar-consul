@@ -280,8 +280,8 @@ github.com/googleapis/gax-go/v2/callctx
 github.com/googleapis/gax-go/v2/internal
 github.com/googleapis/gax-go/v2/internallog
 github.com/googleapis/gax-go/v2/internallog/internal
-# github.com/hashicorp/consul/api v1.32.4
-## explicit; go 1.25.0
+# github.com/hashicorp/consul/api v1.34.3
+## explicit; go 1.26
 github.com/hashicorp/consul/api
 # github.com/hashicorp/errwrap v1.1.0
 ## explicit
