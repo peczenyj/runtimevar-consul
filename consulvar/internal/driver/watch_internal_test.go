@@ -136,7 +136,8 @@ func TestWatchVariable_NotFound_ZeroIndexDoesNotBusyLoop(t *testing.T) {
 	// hundreds to thousands.
 	reqs := f.Requests()
 	assert.Less(t, len(reqs), 20,
-		"zero-index NotFound must block between polls, not busy-loop (got %d requests)", len(reqs))
+		"zero-index NotFound must block between polls, not busy-loop (got %d requests)", len(reqs),
+	)
 }
 
 func TestWatchVariable_KeyAppears(t *testing.T) {
@@ -384,7 +385,8 @@ func TestWatchVariable_BackoffResetsAfterSuccessfulPoll_Issue27(t *testing.T) {
 
 	_, waitB := w.WatchVariable(context.Background(), &state{modifyIndex: 5})
 	assert.Equal(t, time.Second, waitB,
-		"a successful poll must reset backoff; expected 1s, the schedule must not escalate to 2s")
+		"a successful poll must reset backoff; expected 1s, the schedule must not escalate to 2s",
+	)
 }
 
 func TestWatchVariable_Mocked_IndexReset(t *testing.T) {
