@@ -62,6 +62,13 @@ type Options struct {
 	// in Consul KV queries). Zero uses Consul's server-side default (typically
 	// 5 minutes).
 	WaitTime time.Duration
+
+	// Token, if set, is the Consul ACL token to use for this variable.
+	Token string
+
+	// RequireConsistent, if true, forces the query to go to the leader and
+	// ensures it has seen the most recent writes.
+	RequireConsistent bool
 }
 
 // OpenVariable opens a runtimevar.Variable that watches the Consul KV key using
@@ -82,11 +89,13 @@ func OpenVariable(client *api.Client, key string, opts *Options) (*runtimevar.Va
 		decoder = runtimevar.BytesDecoder
 	}
 	w := driver.NewWatcher(client, key, driver.Config{
-		Decoder:    decoder,
-		Datacenter: opts.Datacenter,
-		Namespace:  opts.Namespace,
-		AllowStale: opts.AllowStale,
-		WaitTime:   opts.WaitTime,
+		Decoder:           decoder,
+		Datacenter:        opts.Datacenter,
+		Namespace:         opts.Namespace,
+		AllowStale:        opts.AllowStale,
+		WaitTime:          opts.WaitTime,
+		Token:             opts.Token,
+		RequireConsistent: opts.RequireConsistent,
 	})
 	return runtimevar.New(w), nil
 }

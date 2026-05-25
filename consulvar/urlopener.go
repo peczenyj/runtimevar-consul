@@ -79,6 +79,18 @@ func (o *URLOpener) OpenVariableURL(ctx context.Context, u *url.URL) (*runtimeva
 		opts.WaitTime = d
 		q.Del("wait_time")
 	}
+	if token := q.Get("token"); token != "" {
+		opts.Token = token
+		q.Del("token")
+	}
+	if consistent := q.Get("require_consistent"); consistent != "" {
+		b, err := strconv.ParseBool(consistent)
+		if err != nil {
+			return nil, fmt.Errorf("open variable %q: invalid require_consistent: %w", u, err)
+		}
+		opts.RequireConsistent = b
+		q.Del("require_consistent")
+	}
 	for param := range q {
 		return nil, fmt.Errorf("open variable %q: invalid query parameter %q", u, param)
 	}
