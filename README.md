@@ -1,7 +1,7 @@
 # runtimevar-consul
 
 [![tag](https://img.shields.io/github/tag/peczenyj/runtimevar-consul.svg)](https://github.com/peczenyj/runtimevar-consul/releases)
-![Go Version](https://img.shields.io/badge/Go-%3E%3D%201.26-%23007d9c)
+![Go Version](https://img.shields.io/badge/Go-%3E%3D%201.25-%23007d9c)
 [![GoDoc](https://pkg.go.dev/badge/github.com/peczenyj/runtimevar-consul)](http://pkg.go.dev/github.com/peczenyj/runtimevar-consul)
 [![ci](https://github.com/peczenyj/runtimevar-consul/actions/workflows/ci.yml/badge.svg)](https://github.com/peczenyj/runtimevar-consul/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/peczenyj/runtimevar-consul/graph/badge.svg?token=9y6f3vGgpr)](https://codecov.io/gh/peczenyj/runtimevar-consul)
