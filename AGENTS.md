@@ -4,7 +4,7 @@
 
 ## Project Overview
 
-- **Main Technology:** Go (>= 1.26)
+- **Main Technology:** Go (>= 1.25)
 - **Primary Dependency:** [`github.com/hashicorp/consul/api`](https://github.com/hashicorp/consul) and [`gocloud.dev/runtimevar`](https://gocloud.dev).
 - **Architecture:** 
   - `consulvar/`: Public API and `runtimevar` URL opener registration.
@@ -42,7 +42,7 @@ The project uses `task` (Taskfile) as the task runner.
 - **Dependency Management:**
   - Maintain `go.mod` and `go.sum` via `task tidy`.
   - Always run `go mod vendor` after updating dependencies.
-  - Avoid raising the minimum Go version floor (currently 1.26) unless necessary.
+  - Avoid raising the minimum Go version floor (currently 1.25) unless necessary.
 - **Tooling:**
   - `gotestsum` for test execution and reporting.
   - `golangci-lint` for static analysis.
