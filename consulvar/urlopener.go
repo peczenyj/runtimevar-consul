@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"path"
 	"strconv"
 	"sync"
 	"time"
@@ -114,9 +113,7 @@ func (o *URLOpener) decoderOrDefault() *runtimevar.Decoder {
 	return runtimevar.BytesDecoder
 }
 
-// keyFromURL joins the URL host and path into a Consul KV key. The leading
-// slash from the path is dropped, so "consul://services/auth/db_url" yields
-// "services/auth/db_url".
+// keyFromURL joins the URL host and path into a Consul KV key.
 func keyFromURL(u *url.URL) string {
-	return path.Join(u.Host, u.Path)
+	return u.Host + u.Path
 }

@@ -18,7 +18,9 @@ func TestKeyFromURL(t *testing.T) {
 	}{
 		{"host and path", "consul://services/auth/db_url", "services/auth/db_url"},
 		{"host only", "consul://my-key", "my-key"},
-		{"trailing slash trimmed", "consul://a/b/", "a/b"},
+		{"trailing slash preserved", "consul://a/b/", "a/b/"},
+		{"leading slash preserved", "consul:///a/b", "/a/b"},
+		{"double slash preserved", "consul://a//b", "a//b"},
 		{"query ignored", "consul://a/b?decoder=string", "a/b"},
 	}
 	for _, tt := range tests {
