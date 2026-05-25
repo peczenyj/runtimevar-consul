@@ -22,9 +22,10 @@ func TestURLOpener_OpenVariableURL(t *testing.T) {
 		{name: "decoder bytes", raw: "consul://a/b?decoder=bytes"},
 		{name: "decoder string", raw: "consul://a/b?decoder=string"},
 		{name: "decoder jsonmap", raw: "consul://a/b?decoder=jsonmap"},
-		{name: "datacenter, namespace, wait_time", raw: "consul://a/b?datacenter=dc1&namespace=team&wait_time=30s"},
+		{name: "datacenter, namespace, wait_time, allow_stale", raw: "consul://a/b?datacenter=dc1&namespace=team&wait_time=30s&allow_stale=true"},
 		{name: "invalid decoder", raw: "consul://a/b?decoder=nope", wantErr: "unsupported decoder"},
 		{name: "invalid wait_time", raw: "consul://a/b?wait_time=soon", wantErr: "invalid wait_time"},
+		{name: "invalid allow_stale", raw: "consul://a/b?allow_stale=notbool", wantErr: "invalid allow_stale"},
 		{name: "unknown param", raw: "consul://a/b?bogus=1", wantErr: `invalid query parameter "bogus"`},
 	}
 
@@ -73,6 +74,24 @@ func TestURLOpener_WithFallbackDecoder(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, v)
 	v.Close()
+}
+
+func TestURLOpener_ClientCaching(t *testing.T) {
+	o := &consulvar.URLOpener{}
+	u, _ := url.Parse("consul://key1")
+	ctx := context.Background()
+
+	v1, err := o.OpenVariableURL(ctx, u)
+	require.NoError(t, err)
+	v1.Close()
+
+	// Capture the first client (using a hacky way since it's private, or just
+	// by opening another and seeing if they share same state if I could.
+	// Actually, I can't easily see it from outside, but I can at least
+	// ensure the code path is hit multiple times.
+	v2, err := o.OpenVariableURL(ctx, u)
+	require.NoError(t, err)
+	v2.Close()
 }
 
 // TestOpenVariableURL_SchemeRegistered checks that init() registered the

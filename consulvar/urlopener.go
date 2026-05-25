@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/url"
 	"path"
+	"strconv"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/consul/api"
@@ -32,6 +34,12 @@ type URLOpener struct {
 
 	// Options holds defaults for fields not overridden by the URL.
 	Options Options
+
+	mu         sync.Mutex
+	lazyClient *api.Client
+
+	// opener is api.NewClient by default, but can be overridden in tests.
+	opener func(*api.Config) (*api.Client, error)
 }
 
 // OpenVariableURL opens a runtimevar.Variable for the given Consul KV URL.
@@ -55,6 +63,14 @@ func (o *URLOpener) OpenVariableURL(ctx context.Context, u *url.URL) (*runtimeva
 		opts.Namespace = ns
 		q.Del("namespace")
 	}
+	if stale := q.Get("allow_stale"); stale != "" {
+		b, err := strconv.ParseBool(stale)
+		if err != nil {
+			return nil, fmt.Errorf("open variable %q: invalid allow_stale: %w", u, err)
+		}
+		opts.AllowStale = b
+		q.Del("allow_stale")
+	}
 	if wt := q.Get("wait_time"); wt != "" {
 		d, err := time.ParseDuration(wt)
 		if err != nil {
@@ -71,10 +87,21 @@ func (o *URLOpener) OpenVariableURL(ctx context.Context, u *url.URL) (*runtimeva
 
 	client := o.Client
 	if client == nil {
-		client, err = api.NewClient(api.DefaultConfig())
-		if err != nil {
-			return nil, fmt.Errorf("open variable %q: %w", u, err)
+		o.mu.Lock()
+		if o.lazyClient == nil {
+			opener := o.opener
+			if opener == nil {
+				opener = api.NewClient
+			}
+			c, err := opener(api.DefaultConfig())
+			if err != nil {
+				o.mu.Unlock()
+				return nil, fmt.Errorf("open variable %q: %w", u, err)
+			}
+			o.lazyClient = c
 		}
+		client = o.lazyClient
+		o.mu.Unlock()
 	}
 
 	return OpenVariable(client, key, &opts)

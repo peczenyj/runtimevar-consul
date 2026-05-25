@@ -1,9 +1,9 @@
 module github.com/peczenyj/runtimevar-consul
 
-go 1.26
+go 1.25.0
 
 require (
-	github.com/hashicorp/consul/api v1.34.3
+	github.com/hashicorp/consul/api v1.32.4
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go v0.42.0
 	github.com/testcontainers/testcontainers-go/modules/consul v0.42.0
