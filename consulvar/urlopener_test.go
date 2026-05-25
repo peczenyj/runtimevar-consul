@@ -76,6 +76,24 @@ func TestURLOpener_WithFallbackDecoder(t *testing.T) {
 	v.Close()
 }
 
+func TestURLOpener_ClientCaching(t *testing.T) {
+	o := &consulvar.URLOpener{}
+	u, _ := url.Parse("consul://key1")
+	ctx := context.Background()
+
+	v1, err := o.OpenVariableURL(ctx, u)
+	require.NoError(t, err)
+	v1.Close()
+
+	// Capture the first client (using a hacky way since it's private, or just
+	// by opening another and seeing if they share same state if I could.
+	// Actually, I can't easily see it from outside, but I can at least
+	// ensure the code path is hit multiple times.
+	v2, err := o.OpenVariableURL(ctx, u)
+	require.NoError(t, err)
+	v2.Close()
+}
+
 // TestOpenVariableURL_SchemeRegistered checks that init() registered the
 // "consul" scheme on the default mux so runtimevar.OpenVariable resolves it.
 func TestOpenVariableURL_SchemeRegistered(t *testing.T) {

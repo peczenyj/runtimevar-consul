@@ -1,9 +1,11 @@
 package consulvar
 
 import (
+	"context"
 	"net/url"
 	"testing"
 
+	"github.com/hashicorp/consul/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -26,4 +28,17 @@ func TestKeyFromURL(t *testing.T) {
 			assert.Equal(t, tt.want, keyFromURL(u))
 		})
 	}
+}
+
+func TestURLOpener_ClientCreationFailure(t *testing.T) {
+	o := &URLOpener{
+		opener: func(*api.Config) (*api.Client, error) {
+			return nil, assert.AnError
+		},
+	}
+	u, _ := url.Parse("consul://key")
+	v, err := o.OpenVariableURL(context.Background(), u)
+	require.Error(t, err)
+	assert.ErrorIs(t, err, assert.AnError)
+	assert.Nil(t, v)
 }
