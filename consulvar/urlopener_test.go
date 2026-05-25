@@ -25,6 +25,7 @@ func TestURLOpener_OpenVariableURL(t *testing.T) {
 		{name: "decoder jsonmap", raw: "consul://a/b?decoder=jsonmap"},
 		{name: "datacenter, namespace, wait_time, allow_stale", raw: "consul://a/b?datacenter=dc1&namespace=team&wait_time=30s&allow_stale=true"},
 		{name: "token and require_consistent", raw: "consul://a/b?token=secret&require_consistent=true"},
+		{name: "leading slash in path", raw: "consul:///a/b"},
 		{name: "invalid decoder", raw: "consul://a/b?decoder=nope", wantErr: "unsupported decoder"},
 		{name: "invalid wait_time", raw: "consul://a/b?wait_time=soon", wantErr: "invalid wait_time"},
 		{name: "invalid allow_stale", raw: "consul://a/b?allow_stale=notbool", wantErr: "invalid allow_stale"},

@@ -197,6 +197,38 @@ func TestWatchVariable_TransportErrorThenRecover(t *testing.T) {
 	assert.Equal(t, time.Second, wait3)
 }
 
+func TestWatchVariable_PermissionDenied(t *testing.T) {
+	f := newFakeConsul(t)
+	w := NewWatcher(f.client(t), "k", Config{Decoder: runtimevar.StringDecoder})
+
+	// Simulate a 403 Forbidden
+	f.FailNext(http.StatusForbidden)
+	s, _ := w.WatchVariable(context.Background(), nil)
+
+	require.NotNil(t, s)
+	_, err := s.Value()
+	require.Error(t, err)
+	assert.Equal(t, gcerrors.PermissionDenied, w.ErrorCode(err))
+
+	var se api.StatusError
+	assert.True(t, w.ErrorAs(err, &se))
+	assert.Equal(t, http.StatusForbidden, se.Code)
+}
+
+func TestWatchVariable_ResourceExhausted(t *testing.T) {
+	f := newFakeConsul(t)
+	w := NewWatcher(f.client(t), "k", Config{Decoder: runtimevar.StringDecoder})
+
+	// Simulate a 429 Too Many Requests
+	f.FailNext(http.StatusTooManyRequests)
+	s, _ := w.WatchVariable(context.Background(), nil)
+
+	require.NotNil(t, s)
+	_, err := s.Value()
+	require.Error(t, err)
+	assert.Equal(t, gcerrors.ResourceExhausted, w.ErrorCode(err))
+}
+
 func TestWatchVariable_ContextCancel(t *testing.T) {
 	f := newFakeConsul(t)
 	f.SetValue([]byte("v1"))
