@@ -8,6 +8,7 @@
 [![Report card](https://goreportcard.com/badge/github.com/peczenyj/runtimevar-consul)](https://goreportcard.com/report/github.com/peczenyj/runtimevar-consul)
 [![CodeQL](https://github.com/peczenyj/runtimevar-consul/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/peczenyj/runtimevar-consul/actions/workflows/github-code-scanning/codeql)
 [![Dependency Review](https://github.com/peczenyj/runtimevar-consul/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/peczenyj/runtimevar-consul/actions/workflows/dependency-review.yml)
+[![SLSA Build L2](https://img.shields.io/badge/SLSA-Build_L2-2ea44f)](https://github.com/peczenyj/runtimevar-consul/attestations)
 [![License](https://img.shields.io/github/license/peczenyj/runtimevar-consul)](./LICENSE)
 
 Third-party driver for [`gocloud.dev/runtimevar`](https://pkg.go.dev/gocloud.dev/runtimevar) to read from Consul KV.
