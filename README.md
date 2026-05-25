@@ -46,20 +46,19 @@ Install the toolchain:
 
 ```bash
 go install gotest.tools/gotestsum@latest
-# See https://golangci-lint.run/welcome/install/#local-installation
-curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.64.5
+# golangci-lint v2 — see https://golangci-lint.run/welcome/install/#local-installation
+curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.12.2
 go install github.com/vektra/mockery/v2@latest # only needed to regenerate mocks
-```
-# task: https://taskfile.dev/installation/
+# task:      https://taskfile.dev/installation/
 # git-cliff: https://git-cliff.org/docs/installation
 ```
 
-Requires Go 1.26 or newer (set by the `go` directive in `go.mod`; the dependencies pull the floor up to it).
+Requires Go 1.25 or newer (the `go` directive in `go.mod`).
 
 Common commands (the `Makefile` delegates to `task`):
 
 ```bash
-task ci                 # full pre-push gate: tidy + lint + build + tests on the minimum Go
+task ci                 # full pre-push gate: tidy:check + lint + build + unit + integration
 task test               # unit tests
 task test:integration   # unit + integration (requires Docker)
 task lint
@@ -67,7 +66,7 @@ task format
 task changelog:unreleased
 ```
 
-Run `task ci` before pushing. GitHub Actions runs on `stable` Go only, so `task ci` is the only place the version floor is enforced: it pins the toolchain to the minimum supported Go, so a dependency that raises the floor fails here rather than slipping through CI unnoticed.
+Run `task ci` before pushing — it mirrors the GitHub Actions checks. Both CI and `task ci` run on whatever Go toolchain is installed; the minimum supported version is recorded by the `go` directive in `go.mod` and is not otherwise enforced.
 
 ## Commit messages
 
