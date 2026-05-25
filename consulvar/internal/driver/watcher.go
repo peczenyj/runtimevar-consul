@@ -47,8 +47,8 @@ func (w *Watcher) WatchVariable(ctx context.Context, prev driver.State) (driver.
 			// suppress re-emitting the identical error even when meta.LastIndex
 			// advanced: that index is cluster-wide, so an unrelated KV write
 			// bumps it while our key's existence is unchanged. Advance the wait
-			// index (floored, so a zero index never makes the next query
-			// non-blocking) so the next blocking query waits past the new index.
+			// index (ensuring the next query blocks) so the next blocking query
+			// waits past the new index.
 			if errors.Is(prevErr, errKeyNotFound) {
 				waitIndex = nextBlockingIndex(meta.LastIndex)
 				continue
