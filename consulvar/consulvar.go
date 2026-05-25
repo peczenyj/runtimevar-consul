@@ -17,10 +17,12 @@
 //   - namespace:   the Consul Enterprise namespace.
 //   - allow_stale: whether to allow stale reads ("true" or "false").
 //   - wait_time:   max blocking-query duration, e.g. "30s"; see time.ParseDuration.
+//   - token:       the Consul ACL token to use for the query.
+//   - require_consistent: whether to enforce strong consistency ("true" or "false").
 //
 // Example:
 //
-//	v, err := runtimevar.OpenVariable(ctx, "consul://services/auth/db_url?decoder=string")
+//	v, err := runtimevar.OpenVariable(ctx, "consul://services/auth/db_url?decoder=string&token=secret")
 //
 // # As
 //
@@ -29,7 +31,9 @@
 // other fields of the last observed pair.
 //
 // You can also pass a **github.com/hashicorp/consul/api.QueryMeta to extract
-// Consul query metrics like RequestTime and KnownLeader for successful reads.
+// Consul query metrics like RequestTime and KnownLeader for successful reads,
+// or a **github.com/hashicorp/consul/api.StatusError to inspect the HTTP code
+// and body of a failed request.
 package consulvar
 
 import (
