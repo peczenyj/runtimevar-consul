@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/hashicorp/consul/api"
 	"gocloud.dev/gcerrors"
 )
 
@@ -12,15 +13,28 @@ import (
 // gcerrors.ErrorCode of the user-facing error.
 var errKeyNotFound = errors.New("key not found")
 
-// ErrorAs returns false. Consul's api package does not expose typed errors,
-// so there's no useful conversion to offer.
-func (w *Watcher) ErrorAs(_ error, _ any) bool { return false }
+// ErrorAs unwrap and checks if err is a target error.
+func (w *Watcher) ErrorAs(err error, target any) bool {
+	return errors.As(err, target)
+}
 
 // ErrorCode maps internal errors to gcerrors codes for the runtimevar.Variable.
 func (w *Watcher) ErrorCode(err error) gcerrors.ErrorCode {
-	switch {
-	case err == nil:
+	if err == nil {
 		return gcerrors.OK
+	}
+
+	var se api.StatusError
+	if errors.As(err, &se) {
+		switch se.Code {
+		case 401, 403:
+			return gcerrors.PermissionDenied
+		case 429:
+			return gcerrors.ResourceExhausted
+		}
+	}
+
+	switch {
 	case errors.Is(err, context.Canceled):
 		return gcerrors.Canceled
 	case errors.Is(err, context.DeadlineExceeded):
