@@ -3,13 +3,17 @@
 [![tag](https://img.shields.io/github/tag/peczenyj/runtimevar-consul.svg)](https://github.com/peczenyj/runtimevar-consul/releases)
 ![Go Version](https://img.shields.io/badge/Go-%3E%3D%201.25-%23007d9c)
 [![GoDoc](https://pkg.go.dev/badge/github.com/peczenyj/runtimevar-consul)](http://pkg.go.dev/github.com/peczenyj/runtimevar-consul)
-[![ci](https://github.com/peczenyj/runtimevar-consul/actions/workflows/ci.yml/badge.svg)](https://github.com/peczenyj/runtimevar-consul/actions/workflows/ci.yml)
+[![CI](https://github.com/peczenyj/runtimevar-consul/actions/workflows/ci.yml/badge.svg)](https://github.com/peczenyj/runtimevar-consul/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/peczenyj/runtimevar-consul/graph/badge.svg?token=9y6f3vGgpr)](https://codecov.io/gh/peczenyj/runtimevar-consul)
 [![Report card](https://goreportcard.com/badge/github.com/peczenyj/runtimevar-consul)](https://goreportcard.com/report/github.com/peczenyj/runtimevar-consul)
 [![CodeQL](https://github.com/peczenyj/runtimevar-consul/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/peczenyj/runtimevar-consul/actions/workflows/github-code-scanning/codeql)
 [![Dependency Review](https://github.com/peczenyj/runtimevar-consul/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/peczenyj/runtimevar-consul/actions/workflows/dependency-review.yml)
 [![SLSA Build L2](https://img.shields.io/badge/SLSA-Build_L2-2ea44f)](https://github.com/peczenyj/runtimevar-consul/attestations)
 [![License](https://img.shields.io/github/license/peczenyj/runtimevar-consul)](./LICENSE)
+[![Latest release](https://img.shields.io/github/release/peczenyj/runtimevar-consul.svg)](https://github.com/peczenyj/runtimevar-consul/releases/latest)
+[![GitHub Release Date](https://img.shields.io/github/release-date/peczenyj/runtimevar-consul.svg)](https://github.com/peczenyj/runtimevar-consul/releases/latest)
+[![Last commit](https://img.shields.io/github/last-commit/peczenyj/runtimevar-consul.svg)](https://github.com/peczenyj/runtimevar-consul/commit/HEAD)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/peczenyj/runtimevar-consul/blob/main/CONTRIBUTING.md#pull-request-process)
 
 Third-party driver for [`gocloud.dev/runtimevar`](https://pkg.go.dev/gocloud.dev/runtimevar) to read from Consul KV.
 
