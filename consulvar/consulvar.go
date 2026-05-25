@@ -85,6 +85,7 @@ func OpenVariable(client *api.Client, key string, opts *Options) (*runtimevar.Va
 		Decoder:    decoder,
 		Datacenter: opts.Datacenter,
 		Namespace:  opts.Namespace,
+		AllowStale: opts.AllowStale,
 		WaitTime:   opts.WaitTime,
 	})
 	return runtimevar.New(w), nil
