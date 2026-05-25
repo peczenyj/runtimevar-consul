@@ -66,7 +66,7 @@ func TestState_As_UnsupportedType(t *testing.T) {
 
 func TestErrorAs_AlwaysFalse(t *testing.T) {
 	w := newTestWatcher(t)
-	var target *api.KVPair
+	var target api.StatusError
 	assert.False(t, w.ErrorAs(errors.New("anything"), &target))
 }
 
