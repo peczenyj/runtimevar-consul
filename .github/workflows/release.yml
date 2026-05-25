@@ -6,16 +6,33 @@ on:
       - 'v*'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   release:
     name: Publish GitHub Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write      # create the release and upload assets
+      id-token: write      # OIDC token for Sigstore keyless signing
+      attestations: write  # write the SLSA provenance attestation
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - name: Build source archive
+        id: archive
+        run: |
+          archive="runtimevar-consul-${GITHUB_REF_NAME}.tar.gz"
+          git archive --format=tar.gz \
+            --prefix="runtimevar-consul-${GITHUB_REF_NAME}/" \
+            -o "${archive}" "${GITHUB_REF_NAME}"
+          sha256sum "${archive}" > SHA256SUMS
+          echo "archive=${archive}" >> "${GITHUB_OUTPUT}"
+      - name: Generate SLSA provenance attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ${{ steps.archive.outputs.archive }}
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -24,5 +41,8 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+          files: |
+            ${{ steps.archive.outputs.archive }}
+            SHA256SUMS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
