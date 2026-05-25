@@ -17,11 +17,13 @@ import (
 // Config carries the optional knobs forwarded from the public consulvar
 // package. The Decoder field is required.
 type Config struct {
-	Decoder    *runtimevar.Decoder
-	Datacenter string
-	Namespace  string
-	AllowStale bool
-	WaitTime   time.Duration
+	Decoder           *runtimevar.Decoder
+	Datacenter        string
+	Namespace         string
+	AllowStale        bool
+	WaitTime          time.Duration
+	Token             string
+	RequireConsistent bool
 }
 
 // Watcher implements gocloud.dev/runtimevar/driver.Watcher for a single
@@ -51,10 +53,12 @@ func NewWatcher(client *api.Client, key string, cfg Config) *Watcher {
 		key:     key,
 		decoder: cfg.Decoder,
 		baseQuery: api.QueryOptions{
-			Datacenter: cfg.Datacenter,
-			Namespace:  cfg.Namespace,
-			AllowStale: cfg.AllowStale,
-			WaitTime:   cfg.WaitTime,
+			Datacenter:        cfg.Datacenter,
+			Namespace:         cfg.Namespace,
+			AllowStale:        cfg.AllowStale,
+			WaitTime:          cfg.WaitTime,
+			Token:             cfg.Token,
+			RequireConsistent: cfg.RequireConsistent,
 		},
 	}
 }

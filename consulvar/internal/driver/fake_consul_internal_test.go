@@ -36,12 +36,14 @@ type fakeConsul struct {
 }
 
 type recordedRequest struct {
-	URL       *url.URL
-	WaitIndex string
-	Wait      string
-	DC        string
-	NS        string
-	Stale     string
+	URL        *url.URL
+	WaitIndex  string
+	Wait       string
+	DC         string
+	NS         string
+	Stale      string
+	Token      string
+	Consistent string
 }
 
 func newFakeConsul(t *testing.T) *fakeConsul {
@@ -127,12 +129,14 @@ func (f *fakeConsul) wait(ctx context.Context, clientWaitIndex uint64, waitStr s
 func (f *fakeConsul) handle(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	rec := recordedRequest{
-		URL:       r.URL,
-		WaitIndex: q.Get("index"),
-		Wait:      q.Get("wait"),
-		DC:        q.Get("dc"),
-		NS:        q.Get("ns"),
-		Stale:     strconv.FormatBool(q.Has("stale")),
+		URL:        r.URL,
+		WaitIndex:  q.Get("index"),
+		Wait:       q.Get("wait"),
+		DC:         q.Get("dc"),
+		NS:         q.Get("ns"),
+		Stale:      strconv.FormatBool(q.Has("stale")),
+		Token:      r.Header.Get("X-Consul-Token"),
+		Consistent: strconv.FormatBool(q.Has("consistent")),
 	}
 
 	f.mu.Lock()

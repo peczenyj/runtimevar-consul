@@ -44,7 +44,21 @@ type URLOpener struct {
 // OpenVariableURL opens a runtimevar.Variable for the given Consul KV URL.
 func (o *URLOpener) OpenVariableURL(ctx context.Context, u *url.URL) (*runtimevar.Variable, error) {
 	q := u.Query()
+	opts, err := o.parseOptions(ctx, u, q)
+	if err != nil {
+		return nil, err
+	}
 
+	key := keyFromURL(u)
+	client, err := o.getOrCreateClient(u)
+	if err != nil {
+		return nil, err
+	}
+
+	return OpenVariable(client, key, opts)
+}
+
+func (o *URLOpener) parseOptions(ctx context.Context, u *url.URL, q url.Values) (*Options, error) {
 	decoderName := q.Get("decoder")
 	q.Del("decoder")
 	decoder, err := runtimevar.DecoderByName(ctx, decoderName, o.decoderOrDefault())
@@ -78,32 +92,42 @@ func (o *URLOpener) OpenVariableURL(ctx context.Context, u *url.URL) (*runtimeva
 		opts.WaitTime = d
 		q.Del("wait_time")
 	}
+	if token := q.Get("token"); token != "" {
+		opts.Token = token
+		q.Del("token")
+	}
+	if consistent := q.Get("require_consistent"); consistent != "" {
+		b, err := strconv.ParseBool(consistent)
+		if err != nil {
+			return nil, fmt.Errorf("open variable %q: invalid require_consistent: %w", u, err)
+		}
+		opts.RequireConsistent = b
+		q.Del("require_consistent")
+	}
 	for param := range q {
 		return nil, fmt.Errorf("open variable %q: invalid query parameter %q", u, param)
 	}
+	return &opts, nil
+}
 
-	key := keyFromURL(u)
-
-	client := o.Client
-	if client == nil {
-		o.mu.Lock()
-		if o.lazyClient == nil {
-			opener := o.opener
-			if opener == nil {
-				opener = api.NewClient
-			}
-			c, err := opener(api.DefaultConfig())
-			if err != nil {
-				o.mu.Unlock()
-				return nil, fmt.Errorf("open variable %q: %w", u, err)
-			}
-			o.lazyClient = c
-		}
-		client = o.lazyClient
-		o.mu.Unlock()
+func (o *URLOpener) getOrCreateClient(u *url.URL) (*api.Client, error) {
+	if o.Client != nil {
+		return o.Client, nil
 	}
-
-	return OpenVariable(client, key, &opts)
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	if o.lazyClient == nil {
+		opener := o.opener
+		if opener == nil {
+			opener = api.NewClient
+		}
+		c, err := opener(api.DefaultConfig())
+		if err != nil {
+			return nil, fmt.Errorf("open variable %q: %w", u, err)
+		}
+		o.lazyClient = c
+	}
+	return o.lazyClient, nil
 }
 
 func (o *URLOpener) decoderOrDefault() *runtimevar.Decoder {

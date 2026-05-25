@@ -275,11 +275,13 @@ func TestWatchVariable_PropagatesQueryOptions(t *testing.T) {
 	f := newFakeConsul(t)
 	f.SetValue([]byte("v1"))
 	w := NewWatcher(f.client(t), "k", Config{
-		Decoder:    runtimevar.StringDecoder,
-		Datacenter: "dc1",
-		Namespace:  "team-a",
-		AllowStale: true,
-		WaitTime:   30 * time.Second,
+		Decoder:           runtimevar.StringDecoder,
+		Datacenter:        "dc1",
+		Namespace:         "team-a",
+		AllowStale:        true,
+		WaitTime:          30 * time.Second,
+		Token:             "secret-token",
+		RequireConsistent: true,
 	})
 
 	s, _ := w.WatchVariable(context.Background(), nil)
@@ -292,6 +294,8 @@ func TestWatchVariable_PropagatesQueryOptions(t *testing.T) {
 	assert.Equal(t, "team-a", last.NS, "namespace should reach the Consul query")
 	assert.Equal(t, "true", last.Stale, "allow_stale should reach the Consul query")
 	assert.NotEmpty(t, last.Wait, "wait_time should reach the Consul query")
+	assert.Equal(t, "secret-token", last.Token, "token should reach the Consul query")
+	assert.Equal(t, "true", last.Consistent, "require_consistent should reach the Consul query")
 }
 
 func TestWatchVariable_Mocked(t *testing.T) {
